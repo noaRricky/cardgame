@@ -1,5 +1,6 @@
 package com.zsh.ricky.cardmanager;
 
+import android.Manifest;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.zsh.ricky.cardmanager.AdminActivity;
 import com.zsh.ricky.cardmanager.R;
+import com.zsh.ricky.cardmanager.model.GameHistory;
 import com.zsh.ricky.cardmanager.util.DBAdapter;
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 import com.zsh.ricky.cardmanager.util.UrlResources;
@@ -52,6 +54,59 @@ public class SplashActivity extends AppCompatActivity {
     private ContentValues cValues=new ContentValues();
     private String pic_list=new String();
     private List<String> pic_download_list=new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_splash);
+        getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        //申请SD卡写权限
+        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE},1);
+
+        dbAdapter = new DBAdapter(this, DBAdapter.DB_NAME, null, 1);
+        splash_layout = (LinearLayout) this.findViewById(R.id.SplashLayout);
+        version_view = (TextView) this.findViewById(R.id.version);
+        version_view.setText(getAppVersion());
+
+        //检查网络状态是否可用
+        if (isNetworkConnected())
+        {
+            //更新卡牌
+            Thread update;
+            update = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    updateCards();
+                }
+            });
+            update.start();
+            try {
+                update.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            //splash做一个动画后进入登录界面
+            AlphaAnimation aa = new AlphaAnimation(0.5f, 1.0f);
+            aa.setDuration(2000);
+            splash_layout.setAnimation(aa);
+            splash_layout.startAnimation(aa);
+            //通过handler延迟2秒
+            new Handler().postDelayed(new LoadLoginTask(), 2000);
+        }
+        else
+        {
+            showNetworkDialog();
+        }
+
+        Intent intent = getIntent();
+    }
 
     public void updateCards(){//get卡牌id列表，对比本地信息生成需下载的卡牌列表，开辟新线程逐个下载到本地SD卡中
         final OkHttpHelper helper=new OkHttpHelper();
@@ -132,63 +187,12 @@ public class SplashActivity extends AppCompatActivity {
         File f=new File(path,fileName);
         return f.exists();
     }
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_splash);
-        getSupportActionBar().hide();
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        //申请SD卡写权限
-        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-
-        dbAdapter = new DBAdapter(this, DBAdapter.DB_NAME, null, 1);
-        splash_layout = (LinearLayout) this.findViewById(R.id.SplashLayout);
-        version_view = (TextView) this.findViewById(R.id.version);
-        version_view.setText(getAppVersion());
-
-        //检查网络状态是否可用
-        if (isNetworkConnected())
-        {
-            //更新卡牌
-            Thread update;
-            update = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    updateCards();
-                }
-            });
-            update.start();
-            try {
-                update.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-
-            //splash做一个动画后进入登录界面
-            AlphaAnimation aa = new AlphaAnimation(0.5f, 1.0f);
-            aa.setDuration(2000);
-            splash_layout.setAnimation(aa);
-            splash_layout.startAnimation(aa);
-            //通过handler延迟2秒
-            new Handler().postDelayed(new LoadLoginTask(), 2000);
-        }
-        else
-        {
-            showNetworkDialog();
-        }
-
-        Intent intent = getIntent();
-    }
 
     private class LoadLoginTask implements Runnable
     {
         @Override
         public void run() {
-            Intent intent = new Intent(SplashActivity.this, AdminActivity.class);
+            Intent intent = new Intent(SplashActivity.this, GameActivity.class);
 
             startActivity(intent);
             finish();

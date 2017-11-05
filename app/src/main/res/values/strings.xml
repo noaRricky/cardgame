@@ -43,4 +43,6 @@
     <string name="cardType">卡牌类型</string>
     <string name="cardInfo">卡牌信息</string>
     <string name="historyInfo">历史信息</string>
+    <string name="lose">对战失败</string>
+    <string name="win">对战胜利</string>
 </resources>
