@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_item_layout_item"
+    android:layout_width="match_parent"
+    android:layout_height="130dp"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:weightSum="3"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/card_item_iv_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:contentDescription="@string/cardImage"
+        android:scaleType="centerInside"
+        android:src="@drawable/ac_02"/>
+
+    <TextView
+        android:id="@+id/card_item_tv_name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="老虎"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="25sp" />
+
+    <LinearLayout
+        android:id="@+id/card_item_layout_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/card_item_tv_attack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="100"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/card_item_tv_hp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="1000"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/card_item_tv_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="肉食"
+            android:textSize="20sp" />
+    </LinearLayout>
+</LinearLayout>

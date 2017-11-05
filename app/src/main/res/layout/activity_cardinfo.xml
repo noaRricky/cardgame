@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardinfo_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical">
+
+    <LinearLayout
+        android:id="@+id/cardinfo_inner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/ac_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark">
+
+            <RelativeLayout
+                android:id="@+id/cardInfo_innerToolBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/cardInfo_backImageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@color/colorPrimaryDark"
+                    android:contentDescription="@string/back"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/img_back_small" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBlack"
+                    android:text="@string/cardInfo"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp"/>
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+        <ImageView
+            android:id="@+id/cardinfo_image"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:contentDescription="@string/cardImage"
+            android:scaleType="centerInside"
+            android:src="@drawable/click_image" />
+
+        <EditText
+            android:id="@+id/cardinfo_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:gravity="center"
+            android:hint="@string/cardName"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/cardinfo_hp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:gravity="center"
+            android:hint="@string/cardHP"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/cardinfo_attack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:gravity="center"
+            android:hint="@string/cardAttack"
+            android:inputType="number" />
+
+        <Spinner
+            android:id="@+id/cardinfo_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/cardType"
+            android:prompt="@string/cardType" />
+
+        <LinearLayout
+            android:id="@+id/cardinfo_LLButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/cardinfo_bt_update"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/wp_button_small"
+                android:text="@string/change" />
+
+            <Button
+                android:id="@+id/cardinfo_bt_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/wp_button_small"
+                android:text="@string/delete" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

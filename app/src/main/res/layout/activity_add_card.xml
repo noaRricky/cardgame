@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_addCard"
+    android:scrollbars="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/inner_addCard"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/ac_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark">
+
+            <RelativeLayout
+                android:id="@+id/ac_innerToolBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/ac_ibBack"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@color/colorPrimaryDark"
+                    android:contentDescription="@string/back"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/img_back_small" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBlack"
+                    android:text="@string/cardInfo"
+                    android:layout_centerInParent="true"
+                    android:textSize="20sp"/>
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+
+
+
+        <ImageView
+            android:id="@+id/ac_image"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:contentDescription="@string/cardImage"
+            android:scaleType="centerInside"
+            android:src="@drawable/click_image"
+            />
+
+        <EditText
+            android:id="@+id/ac_etCardName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/cardName"
+            android:inputType="text"
+            android:gravity="center"
+            />
+
+        <EditText
+            android:id="@+id/ac_etCardHp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/cardHP"
+            android:inputType="number"
+            android:gravity="center"/>
+
+        <EditText
+            android:id="@+id/ac_etCardAttack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:hint="@string/cardAttack"
+            android:inputType="number"
+            android:gravity="center"/>
+
+        <Spinner
+            android:id="@+id/ac_spCardType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/cardType"
+            android:prompt="@string/cardType"/>
+
+        <LinearLayout
+            android:id="@+id/ac_LLButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            style="?android:attr/buttonBarButtonStyle"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/ac_btAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/wp_button_small"
+                android:text="@string/add"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
