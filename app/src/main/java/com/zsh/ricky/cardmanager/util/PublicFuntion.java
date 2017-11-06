@@ -21,6 +21,13 @@ import java.util.Map;
  */
 
 public class PublicFuntion {
+    public static final String HistoryNum="HistoryNum";
+    public static final String PlayerA="PlayerA";
+    public static final String PlayerB="PlayerB";
+    public static final String Winner="Winner";
+    public static final String Date="Date";
+    public static final String Time="Time";
+
     //ContentValues 转成 Map<String,String>
     public Map<String,String> ContentValuesToMap(ContentValues cv){
         Map<String,String> temp=new HashMap<>();

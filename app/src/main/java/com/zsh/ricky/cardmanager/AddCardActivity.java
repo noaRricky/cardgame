@@ -199,8 +199,8 @@ public class AddCardActivity extends AppCompatActivity {
         cValues=new ContentValues();
         //"CardID"由数据库自行给出
         cValues.put(DBAdapter.COL_NAME,    cards_name.getText().toString());
-        //卡牌图片名称与卡牌同名
-        cValues.put(DBAdapter.COL_PIC_NAME,cards_name.getText().toString());
+        String[] picName=card_pic_path.split("\\");
+        cValues.put(DBAdapter.COL_PIC_NAME,picName[picName.length-1]);
         cValues.put(DBAdapter.COL_HP,      cards_hp.getText().toString());
         cValues.put(DBAdapter.COL_ATTACK,  cards_attack.getText().toString());
         cValues.put(DBAdapter.COL_TYPE,    cards_type.getSelectedItem().toString());

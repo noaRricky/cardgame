@@ -34,6 +34,7 @@ public class AdminActivity extends FragmentActivity {
     private ViewPager adminPager;
     private LayoutInflater mInflater;
     private List<Fragment> fragments = new ArrayList<>();
+    private List<View> viewList = new ArrayList<>();
     private List<String> tabs = new ArrayList<>();
 
     private static final String TAG = "admin";
@@ -44,7 +45,18 @@ public class AdminActivity extends FragmentActivity {
         setContentView(R.layout.activity_admin);
         initView();
         initFragment();
+        int i=0;
+        i+=1;
     }
+
+    private void initLists() {
+        View historyView = getLayoutInflater().inflate(R.layout.activity_history_fragment, null);
+        View cardView = getLayoutInflater().inflate(R.layout.activity_card_fragment, null);
+
+        viewList.add(historyView);
+        viewList.add(cardView);
+    }
+
     private void initFragment(){
         tabs.add("卡牌管理");
         tabs.add("历史管理");

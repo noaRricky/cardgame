@@ -14,11 +14,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginLeft="10dp"
+        android:visibility="visible"
         android:layout_marginStart="10dp"
         android:contentDescription="@string/cardImage"
-        android:scaleType="centerInside"
-        android:src="@drawable/ac_02"/>
+        android:scaleType="centerInside" />
 
     <TextView
         android:id="@+id/card_item_tv_name"
@@ -26,6 +25,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
+        android:textColor="@color/colorBlack"
         android:text="老虎"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textSize="25sp" />
@@ -42,6 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:textColor="@color/colorBlack"
             android:text="100"
             android:textSize="20sp" />
 
@@ -50,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:textColor="@color/colorBlack"
             android:text="1000"
             android:textSize="20sp" />
 
@@ -58,6 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:textColor="@color/colorBlack"
             android:text="肉食"
             android:textSize="20sp" />
     </LinearLayout>

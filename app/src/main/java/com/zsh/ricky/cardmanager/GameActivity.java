@@ -39,9 +39,6 @@ public class GameActivity extends AppCompatActivity {
     private static final int ROW = 4;
     private static final int COLUMN = 7;
     private static final String TAG = "game";
-    private static final float APPEAR_ALPHA = 1.0f;
-    private static final float DISAPPEAR_ALPHA = 0.0f;
-    private static final float CLICK_ALPHA = 0.5f;
 
     private WebSocket gameSocket;
 
@@ -60,6 +57,9 @@ public class GameActivity extends AppCompatActivity {
     public static final int PLAYER_BATTLE_ROW = 2;
     public static final int MATCH_BATTLE_ROW = 1;
     public static final int MATCH_HAND_ROW = 0;
+    public static final float APPEAR_ALPHA = 1.0f;
+    public static final float DISAPPEAR_ALPHA = 0.0f;
+    public static final float CLICK_ALPHA = 0.5f;
 
     public void initAllGame() {
         fetchExternalCards();
@@ -117,6 +117,56 @@ public class GameActivity extends AppCompatActivity {
                 setContentView(R.layout.game_lose);
             }
         }, 1000);
+    }
+
+    /**
+     * 卡牌出现动画
+     * @param view 要出现的卡牌
+     */
+    public void setAppearAnimation(final View view) {
+
+        //使卡牌逐渐出现
+        view.startAnimation(appearAnimation);
+        appearAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                view.setAlpha(APPEAR_ALPHA);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+    }
+
+    /**
+     * 卡牌消失动画
+     * @param view 要消失的卡牌
+     */
+    public void setDisappearAnimation(final View view) {
+        view.startAnimation(disappearAnimation);
+        disappearAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setAlpha(DISAPPEAR_ALPHA);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     //------------私有函数区域-----------------------------
@@ -250,56 +300,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * 卡牌出现动画
-     * @param view 要出现的卡牌
-     */
-    private void setAppearAnimation(final View view) {
-
-        //使卡牌逐渐出现
-        view.startAnimation(appearAnimation);
-        appearAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                view.setAlpha(APPEAR_ALPHA);
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-    }
-
-    /**
-     * 卡牌消失动画
-     * @param view 要消失的卡牌
-     */
-    private void setDisappearAnimation(final View view) {
-        view.startAnimation(disappearAnimation);
-        disappearAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                view.setAlpha(DISAPPEAR_ALPHA);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-    }
-
-    /**
      * 处理选中的视图是card的事件
      * @param position card位置
      * @param view 当前视图
@@ -328,7 +328,7 @@ public class GameActivity extends AppCompatActivity {
                 if (view.getAlpha() == DISAPPEAR_ALPHA) {
                     view.setAlpha(APPEAR_ALPHA);
                     ImageView imageView = (ImageView) view;
-                    imageView.setImageBitmap(cards.get(position.getCardID()).getCardPhoto());
+                    imageView.setImageBitmap(cards.get(prePositon.getCardID()).getCardPhoto());
                     //设置选择手牌对应的卡牌图片
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
                     preClickedView = null;

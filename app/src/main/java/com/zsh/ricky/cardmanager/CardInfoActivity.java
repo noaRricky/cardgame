@@ -26,6 +26,7 @@ import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 import com.zsh.ricky.cardmanager.util.PublicFuntion;
 import com.zsh.ricky.cardmanager.util.UrlResources;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,23 +41,33 @@ import okhttp3.Response;
  */
 
 public class CardInfoActivity extends AppCompatActivity {
-    private Button bt_update;
-    private Button bt_delete;
-    private ImageButton ib_back;
-    private EditText cards_name;
-    private ImageView cards_pic_name;
+    private Button      bt_update;
+    private ImageButton bt_back;
+    private Button      bt_delete;
+    private EditText    cards_name;
+    private ImageView   cards_pic;
     private EditText    cards_hp;
     private EditText    cards_attack;
-    private Spinner cards_type;
-    private DBAdapter dbAdapter;
+    private Spinner     cards_type;
+    private DBAdapter   dbAdapter;
     private ContentValues cValues;
     private String      card_pic_path;
     private PublicFuntion pf=new PublicFuntion();
+    private Map<String,String> rev_arg=new HashMap<>();
+    private boolean isImageChange=false;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cardinfo);
+        //接收卡牌信息参数
+        Bundle bundle = this.getIntent().getExtras();
+        rev_arg.put(DBAdapter.COL_ID,bundle.getString(DBAdapter.COL_ID));
+        rev_arg.put(DBAdapter.COL_NAME,bundle.getString(DBAdapter.COL_NAME));
+        rev_arg.put(DBAdapter.COL_PIC_NAME,bundle.getString(DBAdapter.COL_PIC_NAME));
+        rev_arg.put(DBAdapter.COL_ATTACK,bundle.getString(DBAdapter.COL_ATTACK));
+        rev_arg.put(DBAdapter.COL_HP,bundle.getString(DBAdapter.COL_HP));
+        rev_arg.put(DBAdapter.COL_TYPE,bundle.getString(DBAdapter.COL_TYPE));
 
         ActivityCompat.requestPermissions(CardInfoActivity.this, new String[]{
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -64,7 +75,7 @@ public class CardInfoActivity extends AppCompatActivity {
         initWeightItems();
 
         //ImageView点击事件，获取一个图片，并为 card_pic_path 赋值
-        cards_pic_name.setOnClickListener(new View.OnClickListener() {
+        cards_pic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK, null);
@@ -73,13 +84,13 @@ public class CardInfoActivity extends AppCompatActivity {
                 startActivityForResult(intent, 0x1);
             }
         });
-        //添加按钮事件 ———— 上传卡牌信息到服务器，添加信息到本地数据库
+        //修改按钮事件 ———— 上传卡牌信息到服务器，更新信息到本地数据库
         dbAdapter = new DBAdapter(this, DBAdapter.DB_NAME, null, 1);
         bt_update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    if (cards_pic_name.getDrawable() == null || cards_attack.getText().toString() == null || cards_hp.getText().toString() == null || cards_name.getText().toString() == null || cards_type.getSelectedItem().toString() == null) {
+                    if (cards_pic.getDrawable() == null || cards_attack.getText().toString() == null || cards_hp.getText().toString() == null || cards_name.getText().toString() == null || cards_type.getSelectedItem().toString() == null) {
                         Toast.makeText(getApplicationContext(), "卡牌信息不完整！",
                                 Toast.LENGTH_SHORT).show();
                         return;
@@ -102,39 +113,42 @@ public class CardInfoActivity extends AppCompatActivity {
                             });
                             e.printStackTrace();
                         }
-
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             //图片上传到服务器
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        OkHttpHelper post_pic = new OkHttpHelper();
-                                        Call pic_call = post_pic.imageUpLoad(UrlResources.UPDATE_CARD_PIC, card_pic_path);
-                                        pic_call.enqueue(new Callback() {
-                                            @Override
-                                            public void onFailure(Call call, IOException e) {
-                                                Toast.makeText(getApplicationContext(), "图片上传失败",
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-
-                                            @Override
-                                            public void onResponse(Call call, Response response) throws IOException {
-                                                //添加到本地数据库中
-                                                SQLiteDatabase db = dbAdapter.getWritableDatabase();
-                                                Cursor dataset = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
-                                                //db.update(DBAdapter.TABLE_NAME, null, cValues);
-                                                cValues.clear();
-                                                //保存图片到本地目录
-                                                pf.copyFile(card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH);
-                                            }
-                                        });
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                            if (isImageChange){
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            OkHttpHelper post_pic = new OkHttpHelper();
+                                            Call pic_call = post_pic.imageUpLoad(UrlResources.UPDATE_CARD_PIC, card_pic_path);
+                                            pic_call.enqueue(new Callback() {
+                                                @Override
+                                                public void onFailure(Call call, IOException e) {
+                                                    Toast.makeText(getApplicationContext(), "图片上传失败",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                                @Override
+                                                public void onResponse(Call call, Response response) throws IOException {
+                                                    //保存图片到本地目录
+                                                    pf.copyFile(card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH);
+                                                    Toast.makeText(getApplicationContext(), "更新成功！",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            }).start();
+                                }).start();
+                            }//更新到本地数据库中
+                            SQLiteDatabase db = dbAdapter.getWritableDatabase();
+                            Cursor dataset = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
+                            String[] args={rev_arg.get(DBAdapter.COL_ID)};
+                            db.update(DBAdapter.TABLE_NAME, cValues,DBAdapter.COL_ID+"=?",args);
+                            cValues.clear();
+
                         }
                     });
                 } catch (Exception e) {
@@ -143,30 +157,76 @@ public class CardInfoActivity extends AppCompatActivity {
                 }
             }
         });
-        //返回按钮事件 ———— 返回上一级
-        ib_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        //删除按钮事件 ———— 删除当前卡牌信息
+        //删除卡牌信息
         bt_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                try{
+                    OkHttpHelper httpHelper = new OkHttpHelper();
+                    Map<String, String> card_info = new HashMap<String, String>();
+                    card_info.put(DBAdapter.COL_ID,rev_arg.get(DBAdapter.COL_ID));
+                    Call call = httpHelper.postRequest(UrlResources.DELETE_CARD, card_info);
+                    call.enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(),
+                                            "服务器删除卡牌失败！", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            e.printStackTrace();
+                        }
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            //删除本地卡牌信息，并跳转到上一级页面
+                            SQLiteDatabase db = dbAdapter.getWritableDatabase();
+                            //Cursor dataset = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
+                            db.delete(DBAdapter.TABLE_NAME,DBAdapter.COL_ID+"=?",new String[]{rev_arg.get(DBAdapter.COL_ID)});
+                            File pic=new File(OkHttpHelper.BITMAP_SAVE_PATH+rev_arg.get(DBAdapter.COL_PIC_NAME));
+                            pic.delete();
+                            Toast.makeText(getApplicationContext(), "删除成功！",
+                                    Toast.LENGTH_SHORT).show();
+                            //跳转到上一级页面
+                            Intent intent =new Intent(CardInfoActivity.this,AdminActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        //返回按钮事件 ———— 返回上一级
+        bt_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CardInfoActivity.this, AdminActivity.class);
+                startActivity(intent);
             }
         });
     }
     public void initWeightItems() {
         bt_update=(Button)this.findViewById(R.id.cardinfo_bt_update);
+        bt_delete=(Button)this.findViewById(R.id.cardinfo_bt_delete);
+        bt_back=(ImageButton)this.findViewById(R.id.cardInfo_backImageButton);
         cards_name=(EditText)this.findViewById(R.id.cardinfo_name);
-        cards_pic_name=(ImageView)this.findViewById(R.id.cardinfo_image);
+        cards_pic=(ImageView)this.findViewById(R.id.cardinfo_image);
         cards_hp=(EditText)this.findViewById(R.id.cardinfo_hp);
         cards_attack=(EditText)this.findViewById(R.id.cardinfo_attack);
         cards_type=(Spinner)this.findViewById(R.id.cardinfo_type);
-        bt_delete=(Button)this.findViewById(R.id.cardinfo_bt_delete);
-        ib_back = (ImageButton) this.findViewById(R.id.cardInfo_backImageButton);
+
+        //添加初始信息
+        cards_name.setText(rev_arg.get(DBAdapter.COL_NAME));
+        Bitmap pic=BitmapFactory.decodeFile(OkHttpHelper.BITMAP_SAVE_PATH+rev_arg.get(DBAdapter.COL_PIC_NAME));
+        cards_pic.setImageBitmap(pic);
+        cards_attack.setText(rev_arg.get(DBAdapter.COL_ATTACK));
+        cards_hp.setText(rev_arg.get(DBAdapter.COL_HP));
+        int position=0;
+        if (rev_arg.get(DBAdapter.COL_TYPE)!="肉食动物"){position=1;}
+        cards_type.setSelection(position);
     }
     //显示图片
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -176,7 +236,7 @@ public class CardInfoActivity extends AppCompatActivity {
 
             PublicFuntion pf=new PublicFuntion();
             card_pic_path=pf.getRealPathFromUri(this,uri);
-
+            isImageChange=true;
             ContentResolver cr = this.getContentResolver();
             try {
                 Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
@@ -195,8 +255,13 @@ public class CardInfoActivity extends AppCompatActivity {
         cValues=new ContentValues();
         //"CardID"由数据库自行给出
         cValues.put(DBAdapter.COL_NAME,    cards_name.getText().toString());
-        //卡牌图片名称与卡牌同名
-        cValues.put(DBAdapter.COL_PIC_NAME,cards_name.getText().toString());
+        if (isImageChange==true){
+            String[] picName=card_pic_path.split("\\");
+            cValues.put(DBAdapter.COL_PIC_NAME,picName[picName.length-1]);
+        }
+        else {
+            cValues.put(DBAdapter.COL_PIC_NAME,rev_arg.get(DBAdapter.COL_PIC_NAME));
+        }
         cValues.put(DBAdapter.COL_HP,      cards_hp.getText().toString());
         cValues.put(DBAdapter.COL_ATTACK,  cards_attack.getText().toString());
         cValues.put(DBAdapter.COL_TYPE,    cards_type.getSelectedItem().toString());

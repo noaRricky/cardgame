@@ -16,4 +16,7 @@ public class UrlResources {
     public static final String NEW_CARD_PIC="new_card_pic";
     public static final String UPDATE_CARD_INFO="update_card_info";
     public static final String UPDATE_CARD_PIC="update_card_pic";
+    public static final String DELETE_CARD="delete_card";
+
+    public static final String UPDATE_HISTORY="update_history";
 }

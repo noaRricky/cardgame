@@ -21,7 +21,10 @@ public class HistoryAdapter extends BaseAdapter {
 
     private Context context;
     private List<GameHistory> data;
-
+    public HistoryAdapter(List<GameHistory> d,Context ct){
+        context=ct;
+        data=d;
+    }
     @Override
     public int getCount() {
         return data.size();
@@ -57,9 +60,10 @@ public class HistoryAdapter extends BaseAdapter {
         viewHolder = (ViewHolder) convertView.getTag();
         //设置数据
         GameHistory history = data.get(position);
-        String players = history.getPlayerA() + " vs " + history.getPlayerB();
+        String players = "对战者：" + history.getPlayerA() + " vs " + history.getPlayerB();
         viewHolder.hPlayerTv.setText(players);
-        viewHolder.hWinnerTv.setText(history.getWinner());
+        String winner = "胜者：" + history.getWinner();
+        viewHolder.hWinnerTv.setText(winner);
         viewHolder.hDateTv.setText(history.getDate());
 
         return convertView;

@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         android:textSize="25sp"
         android:gravity="center_horizontal"
+        android:textColor="@color/colorBlack"
         android:text="川普 vs 乔丹"/>
 
     <LinearLayout
@@ -23,6 +24,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:gravity="center_horizontal"
+            android:textColor="@color/colorBlack"
             android:layout_weight="1"
             android:text="胜者：乔丹"/>
 
@@ -33,6 +35,7 @@
             android:layout_weight="1"
             android:textSize="20sp"
             android:gravity="center_horizontal"
+            android:textColor="@color/colorBlack"
             android:text="2018-9-20"/>
 
     </LinearLayout>

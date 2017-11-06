@@ -192,7 +192,7 @@ public class SplashActivity extends AppCompatActivity {
     {
         @Override
         public void run() {
-            Intent intent = new Intent(SplashActivity.this, GameActivity.class);
+            Intent intent = new Intent(SplashActivity.this, AdminActivity.class);
 
             startActivity(intent);
             finish();
