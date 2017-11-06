@@ -24,6 +24,13 @@ public class Position {
         this.cardID = -1;
     }
 
+    public Position(int row, int column, int cardID, Type type) {
+        this.row = row;
+        this.column = column;
+        this.cardID = cardID;
+        this.type = type;
+    }
+
     public Type getType() {
         return type;
     }

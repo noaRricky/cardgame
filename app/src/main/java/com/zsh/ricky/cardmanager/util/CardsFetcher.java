@@ -38,7 +38,7 @@ public class CardsFetcher {
         cardList = new ArrayList<>();
 
         try {
-            for (dataSet.moveToFirst(); dataSet.isAfterLast(); dataSet.moveToNext()) {
+            for (dataSet.moveToFirst(); !dataSet.isAfterLast(); dataSet.moveToNext()) {
                 Card card = newCard(
                         dataSet.getInt(dataSet.getColumnIndex(DBAdapter.COL_ID)),
                         dataSet.getString(dataSet.getColumnIndex(DBAdapter.COL_NAME)),

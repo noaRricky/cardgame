@@ -18,6 +18,8 @@ import com.zsh.ricky.cardmanager.util.CardsFetcher;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.WebSocket;
+
 public class GameActivity extends AppCompatActivity {
 
     private GameActivity gameActivity = null;
@@ -28,20 +30,11 @@ public class GameActivity extends AppCompatActivity {
     private View preClickedView;
     private Position prePositon;
 
-    private List<ImageView> playerHandCardViews;     //玩家手牌img
-    private List<ImageView> playerBattleCardViews;   //玩家战场卡牌img
-    private List<ImageView> matchHandCardViews;      //对手手牌img
-    private List<ImageView> matchBattleCardView;    //对手战场卡牌img
-
     private int windowWidth;
     private int windowHeight;
 
     private AlphaAnimation appearAnimation;
     private AlphaAnimation disappearAnimation;
-
-    private List<Card> cards;
-    private int playerCard = 0;     //表示玩家已经抽到的牌的位置
-    private int battleCard = 0;     //表示对战玩家已经抽道德牌的位置
 
     private static final int ROW = 4;
     private static final int COLUMN = 7;
@@ -49,9 +42,84 @@ public class GameActivity extends AppCompatActivity {
     private static final float APPEAR_ALPHA = 1.0f;
     private static final float DISAPPEAR_ALPHA = 0.0f;
     private static final float CLICK_ALPHA = 0.5f;
-    private static final int PLAYER_HAND_ROW = 3;
-    private static final int PLAYER_BATTLE_ROW = 2;
-    private static final int MATCH_BATTLE_ROW = 1;
+
+    private WebSocket gameSocket;
+
+    //--------------公共变量---------------------------
+    public List<ImageView> playerHandCardViews;     //玩家手牌img
+    public List<ImageView> playerBattleCardViews;   //玩家战场卡牌img
+    public List<ImageView> matchHandCardViews;      //对手手牌img
+    public List<ImageView> matchBattleCardView;    //对手战场卡牌img
+
+
+    public List<Card> cards;
+    public int playerCard = 0;     //表示玩家已经抽到的牌的位置
+    public int battleCard = 0;     //表示对战玩家已经抽道德牌的位置
+
+    public static final int PLAYER_HAND_ROW = 3;
+    public static final int PLAYER_BATTLE_ROW = 2;
+    public static final int MATCH_BATTLE_ROW = 1;
+    public static final int MATCH_HAND_ROW = 0;
+
+    public void initAllGame() {
+        fetchExternalCards();
+        initImage();
+        initAnimation();
+    }
+
+    /**
+     * 通过将所有控件设置能不能点击，禁止玩家操作
+     */
+    public void waitForNext() {
+        for (ImageView view : playerBattleCardViews) {
+            view.setClickable(false);
+        }
+        for (ImageView view : playerHandCardViews) {
+            view.setClickable(false);
+        }
+        for (ImageView view : matchBattleCardView) {
+            view.setClickable(false);
+        }
+        for (ImageView view : matchHandCardViews) {
+            view.setClickable(false);
+        }
+    }
+
+    /**
+     * 通过将所有控件设置为可点击，让玩家进行操作
+     */
+    public void startTurn() {
+
+        //首先完成抽排后，玩家才能操作
+        drawDeck();
+
+        for (ImageView view : playerHandCardViews) {
+            view.setClickable(true);
+        }
+        for (ImageView view : playerBattleCardViews) {
+            view.setClickable(true);
+        }
+        for (ImageView view : matchBattleCardView) {
+            view.setClickable(true);
+        }
+        for (ImageView view : matchHandCardViews) {
+            view.setClickable(true);
+        }
+    }
+
+    public void gameLose() {
+        ImageView img = playerHandCardViews.get(0);
+        setDisappearAnimation(img);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setContentView(R.layout.game_lose);
+            }
+        }, 1000);
+    }
+
+    //------------私有函数区域-----------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +134,6 @@ public class GameActivity extends AppCompatActivity {
         windowWidth = metrics.widthPixels;
         preClickedView = null;
         prePositon = null;
-
-        fetchExternalCards();
-        initImage();
-        initAnimation();
 
     }
 
@@ -354,5 +418,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
+
+
 
 }
