@@ -101,6 +101,7 @@ public class PublicFuntion {
     private String getRealPathFromUriBelowAPI19(Context context, Uri uri) {
         return getDataColumn(context, uri, null, null);
     }
+
     private String getRealPathFromUriAboveApi19(Context context, Uri uri) {
         String filePath = null;
         if (DocumentsContract.isDocumentUri(context, uri)) {
@@ -126,6 +127,7 @@ public class PublicFuntion {
         }
         return filePath;
     }
+
     private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         String path = null;
 
