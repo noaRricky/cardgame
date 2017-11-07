@@ -145,7 +145,7 @@
             <Button
                 android:id="@+id/hi_btChange"
                 style="@style/MinButtonTheme"
-                android:text="@string/add"/>
+                android:text="@string/change"/>
 
             <Button
                 android:id="@+id/hi_btDelete"

@@ -15,6 +15,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
+import com.zsh.ricky.cardmanager.util.PublicFuntion;
 import com.zsh.ricky.cardmanager.util.UrlResources;
 
 import org.json.JSONException;
@@ -126,14 +127,15 @@ public class AddHistoryActivity extends AppCompatActivity {
                 String playerA = etPlayerA.getText().toString();
                 String playerB = etPlayerB.getText().toString();
                 String winner = etWinner.getText().toString();
-                String datetime = etDate.getText().toString() + " " +
-                        etTime.getText().toString();
+                String date = etDate.getText().toString();
+                String time = etTime.getText().toString();
 
                 Map<String, String> map = new HashMap<>();
-                map.put("playerA", playerA);
-                map.put("playerB", playerB);
-                map.put("winner", winner);
-                map.put("datetime", datetime);
+                map.put(PublicFuntion.PlayerA, playerA);
+                map.put(PublicFuntion.PlayerB, playerB);
+                map.put(PublicFuntion.Winner, winner);
+                map.put(PublicFuntion.Date, date);
+                map.put(PublicFuntion.Time, time);
 
                 OkHttpHelper helper = new OkHttpHelper();
                 Call call = helper.postRequest(UrlResources.ADD_HISTORY, map);

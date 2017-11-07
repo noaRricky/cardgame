@@ -90,34 +90,7 @@ public class HistoryInfoActivity extends AppCompatActivity {
      */
     private void initEvent() {
         //设置更新按钮按下
-        bt_update.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validate()) {
-                    Map<String, String> post_data = getPostData();
-                    OkHttpHelper helper = new OkHttpHelper();
-                    Call update = helper.postRequest(UrlResources.UPDATE_HISTORY, post_data);
-                    update.enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            Toast.makeText(HistoryInfoActivity.this, "与服务器连接失败！请稍后再试！",
-                                    Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            Toast.makeText(getApplicationContext(), "更新成功！",
-                                    Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(HistoryInfoActivity.this, AdminActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
-                }
-
-            }
-        });
+        bt_update.setOnClickListener(new UpdateClick());
 
         bt_delete.setOnClickListener(new DeleteClick());
         bt_back.setOnClickListener(new View.OnClickListener() {
@@ -193,25 +166,77 @@ public class HistoryInfoActivity extends AppCompatActivity {
             delete.enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    Toast.makeText(getApplicationContext(), "连接服务器失败",
-                            Toast.LENGTH_SHORT).show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "连接服务器失败",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-                    Toast.makeText(getApplicationContext(), "删除数据成功",
-                            Toast.LENGTH_SHORT).show();
-                    new Handler().postDelayed(new Runnable() {
+                    runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Intent intent = new Intent(HistoryInfoActivity.this,
-                                    AdminActivity.class);
-                            startActivity(intent);
-                            finish();
+                            Toast.makeText(getApplicationContext(), "删除数据成功",
+                                    Toast.LENGTH_SHORT).show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Intent intent = new Intent(HistoryInfoActivity.this,
+                                            AdminActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            }, 1000);
                         }
-                    }, 1000);
+                    });
                 }
             });
+        }
+    }
+
+    /**
+     * 处理更新历史按钮事件
+     */
+    private class UpdateClick implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            if (validate()) {
+                Map<String, String> post_data = getPostData();
+                OkHttpHelper helper = new OkHttpHelper();
+                Call update = helper.postRequest(UrlResources.UPDATE_HISTORY, post_data);
+                update.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(HistoryInfoActivity.this, "与服务器连接失败！请稍后再试！",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), "更新成功！",
+                                        Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(HistoryInfoActivity.this, AdminActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
