@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_user_property"
+    android:background="@drawable/dragon"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical">
+
+    <LinearLayout
+        android:id="@+id/cup_Layer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupName"
+            android:layout_marginTop="20dp"
+            android:text="@string/username"
+            android:gravity="center"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupInputName"
+            android:hint="@string/username"
+            android:gravity="center"
+            android:inputType="text"
+            android:background="@color/colorWheat"
+            android:textSize="20sp"
+            android:textColor="@color/colorSaddleBrown"
+            />
+
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/cupPassword"
+            android:layout_marginTop="10dp"
+            android:text="@string/password"
+            android:gravity="center" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupInputPassword"
+            android:hint="@string/password"
+            android:background="@color/colorWheat"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/colorSaddleBrown"
+            android:minHeight="24dp"
+            />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupPassquestion"
+            android:layout_marginTop="10dp"
+            android:text="@string/question"
+            android:gravity="center"
+
+            />
+
+        <EditText
+            android:id="@+id/cupEditQuestion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWheat"
+            android:inputType="text"
+            android:gravity="center"
+            android:hint="@string/question"
+            android:minHeight="24dp"
+            android:textColor="@color/colorSaddleBrown"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/cupPassquestionAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@string/answer" />
+
+        <EditText
+            android:id="@+id/cupEditPassquestionAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWheat"
+            android:inputType="text"
+            android:gravity="center"
+            android:hint="@string/answer"
+            android:minHeight="24dp"
+            android:textColor="@color/colorSaddleBrown"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text = "@string/datetime"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:id="@+id/cupRegisterTime"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupShowRegisterTime"
+            android:background="@color/colorWheat"
+            android:gravity="center"
+            android:hint="@string/datetime"
+            android:minHeight="24dp"
+            android:textColor="@color/colorSaddleBrown"
+            android:textSize="20sp"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cupMessage"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:gravity="end">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/start_bt_small"
+                android:id="@+id/cupChange"
+                android:text="@string/change" />
+
+            <Button
+                android:layout_width = "wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/start_bt_small"
+                android:id="@+id/cupReturn"
+                android:text="@string/back"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

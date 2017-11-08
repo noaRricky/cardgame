@@ -62,9 +62,12 @@
             android:name=".RegisterActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".ChangeActivity"
+        <activity
+            android:name=".ChangeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".DeckActivity" />
+        <activity android:name=".UserInfoActivity"></activity>
     </application>
 
 </manifest>

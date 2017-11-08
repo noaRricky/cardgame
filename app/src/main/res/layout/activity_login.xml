@@ -11,7 +11,7 @@
         android:id="@+id/inner_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFF5F5F5"
+        android:background="@drawable/login_back"
         android:paddingBottom="10dip"
         android:paddingLeft="10dip"
         android:paddingRight="10dip" >
@@ -48,6 +48,7 @@
                 android:id="@+id/wrapper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
                 android:layout_below="@id/l_section1" >
 
                 <EditText

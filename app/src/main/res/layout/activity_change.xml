@@ -3,7 +3,7 @@
     android:id="@+id/scroll_change_password"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#FFF5F5F5"
+    android:background="@drawable/login_back"
     android:scrollbars="vertical" >
 
     <LinearLayout
