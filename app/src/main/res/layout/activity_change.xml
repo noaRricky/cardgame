@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_change_password"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFF5F5F5"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:id="@+id/inner_change_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/content_bg"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:gravity="center"
+            android:text="@string/change_password"
+            android:textColor="@color/colorWhite"
+            android:textSize="28sp"/>
+
+        <EditText
+            android:layout_marginTop="10dp"
+            android:id="@+id/etNewPassword"
+            style="@style/SingleLineTheme"
+            android:hint="@string/new_password"
+            android:inputType="textPassword"
+            />
+
+        <EditText
+            android:id="@+id/etRepeatPassword"
+            style="@style/SingleLineTheme"
+            android:hint="@string/repeat_password"
+            android:inputType="textPassword"
+            android:paddingTop="20dp" />
+
+        <LinearLayout
+            android:id="@+id/cp_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingTop="10dp">
+
+            <Button
+                android:id="@+id/cp_YesButton"
+                style="@style/MinButtonTheme"
+                android:text="@string/yes"/>
+
+            <Button
+                android:id="@+id/cp_CancelButton"
+                style="@style/MinButtonTheme"
+                android:text="@string/cancel"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

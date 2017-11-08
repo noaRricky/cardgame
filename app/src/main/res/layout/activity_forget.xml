@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_forget"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFF5F5F5"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:gravity="center"
+            android:text="@string/forget"
+            android:textColor="@color/colorWhite"
+            android:textSize="28sp"/>
+
+        <RelativeLayout
+            android:id="@+id/inner_forget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/content_bg"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:id="@+id/label_question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/question"
+                android:paddingTop="30dp"/>
+
+            <TextView
+                android:layout_below="@id/label_question"
+                android:id="@+id/fg_question"
+                style="@style/SingleLineTheme"/>
+
+            <TextView
+                android:layout_below="@id/fg_question"
+                android:id="@+id/label_answer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/answer"/>
+
+            <EditText
+                android:layout_below="@id/label_answer"
+                android:id="@+id/fg_answer"
+                android:inputType="text"
+                style="@style/SingleLineTheme"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_below="@id/fg_answer"
+                android:id="@+id/fg_inner_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/fg_btYes"
+                    style="@style/MinButtonTheme"
+                    android:text="@string/yes"/>
+
+                <Button
+                    android:id="@+id/fg_btCancel"
+                    style="@style/MinButtonTheme"
+                    android:text="@string/cancel"/>
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
+
+</ScrollView>

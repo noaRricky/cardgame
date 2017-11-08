@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll_register"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFF5F5F5"
+    android:scrollbars="vertical" >
+
+    <LinearLayout
+        android:id="@+id/inner_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:textColor="@color/colorWhite"
+            android:textSize="28sp"
+            android:gravity="center_horizontal"
+            android:text="@string/register"/>
+
+        <EditText
+            android:id="@+id/rg_etUserID"
+            style="@style/SingleLineTheme"
+            android:hint="@string/userID"
+            android:inputType="text"
+            android:layout_marginTop="10dp"
+            />
+
+        <EditText
+            android:id="@+id/rg_etPassword"
+            style="@style/SingleLineTheme"
+            android:hint="@string/password"
+            android:inputType="textPassword"/>
+
+        <EditText
+            android:id="@+id/rg_etUsername"
+            style="@style/SingleLineTheme"
+            android:inputType="text"
+            android:hint="@string/username"/>
+
+        <EditText
+            android:id="@+id/rg_etQuestion"
+            style="@style/SingleLineTheme"
+            android:hint="@string/question"
+            android:inputType="text"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/rg_etAnswer"
+            style="@style/SingleLineTheme"
+            android:inputType="text"
+            android:hint="@string/answer"/>
+
+        <LinearLayout
+            android:id="@+id/rg_ButtonLayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/rg_YesButton"
+                style="@style/MinButtonTheme"
+                android:text="@string/yes"/>
+            <Button
+                android:id="@+id/rg_ButtonCancel"
+                style="@style/MinButtonTheme"
+                android:text="@string/cancel"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

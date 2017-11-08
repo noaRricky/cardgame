@@ -34,7 +34,6 @@ public class AdminActivity extends FragmentActivity {
     private ViewPager adminPager;
     private LayoutInflater mInflater;
     private List<Fragment> fragments = new ArrayList<>();
-    private List<View> viewList = new ArrayList<>();
     private List<String> tabs = new ArrayList<>();
 
     private static final String TAG = "admin";
@@ -52,14 +51,6 @@ public class AdminActivity extends FragmentActivity {
         initFragment();
     }
 
-    private void initLists() {
-        View historyView = getLayoutInflater().inflate(R.layout.activity_history_fragment, null);
-        View cardView = getLayoutInflater().inflate(R.layout.activity_card_fragment, null);
-
-        viewList.add(historyView);
-        viewList.add(cardView);
-    }
-
     private void initFragment(){
         tabs.add("卡牌管理");
         tabs.add("历史管理");
@@ -68,6 +59,7 @@ public class AdminActivity extends FragmentActivity {
         adminPager.setAdapter(new TabAdapter(getSupportFragmentManager()));
         adminTab.setupWithViewPager(adminPager);
     }
+
     private void initView() {
         addImgBt = (ImageButton) this.findViewById(R.id.admin_addBt);
         backImgBt = (ImageButton) this.findViewById(R.id.admin_backImageButton);
@@ -76,6 +68,15 @@ public class AdminActivity extends FragmentActivity {
         adminPager=(ViewPager)findViewById(R.id.admin_viewPager);
 
         addImgBt.setOnClickListener(new AddMenuClick());
+
+        backImgBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AdminActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
     }
 

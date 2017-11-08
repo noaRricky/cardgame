@@ -45,4 +45,5 @@
     <string name="historyInfo">历史信息</string>
     <string name="lose">对战失败</string>
     <string name="win">对战胜利</string>
+    <string name="change_password">修改密码</string>
 </resources>
