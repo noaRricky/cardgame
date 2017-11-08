@@ -2,6 +2,7 @@ package com.zsh.ricky.cardmanager;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -11,9 +12,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,6 +58,11 @@ public class SplashActivity extends AppCompatActivity {
     private String pic_list=new String();
     private List<String> pic_download_list=new ArrayList<>();
 
+    private static final String self_permissions[] = {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,10 +71,13 @@ public class SplashActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        //申请SD卡写权限
-        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE},1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int i = ContextCompat.checkSelfPermission(this, self_permissions[0]);
+            if (i != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(SplashActivity.this,
+                        self_permissions, 1);
+            }
+        }
 
         dbAdapter = new DBAdapter(this, DBAdapter.DB_NAME, null, 1);
         splash_layout = (LinearLayout) this.findViewById(R.id.SplashLayout);

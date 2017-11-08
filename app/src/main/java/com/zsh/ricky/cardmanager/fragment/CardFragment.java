@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
@@ -36,7 +37,7 @@ import java.util.Map;
 
 public class CardFragment extends Fragment{
     private View view;
-    private GridView gv_info;
+    private ListView gv_info;
     private List<Map<String,Object>> data;
     private List<String> cards_id_list;
     private List<String> cards_pic_name_list;
@@ -95,7 +96,7 @@ public class CardFragment extends Fragment{
     }
 
     protected void initWeight() {
-        gv_info=(GridView) view.findViewById(R.id.cards_info_gv_info);
+        gv_info=(ListView) view.findViewById(R.id.cards_info_gv_info);
     }
     private void initData(){
         //数据库中加载卡牌信息，将id信息存入cards_id_list，其余信息转入 data,其中data中的 CardPhotoName的Object存对应的Bitmap信息
@@ -108,8 +109,9 @@ public class CardFragment extends Fragment{
             Map<String, Object> item=new HashMap<String,Object>();
             cards_id_list.add(dataset.getString(dataset.getColumnIndex(DBAdapter.COL_ID)));
 
-            Bitmap pic= BitmapFactory.decodeFile(OkHttpHelper.BITMAP_SAVE_PATH+dataset.getString(dataset.getColumnIndex(DBAdapter.COL_PIC_NAME)));
             cards_pic_name_list.add(dataset.getString(dataset.getColumnIndex(DBAdapter.COL_PIC_NAME)));
+            //String picName=cards_pic_name_list.get(cards_pic_name_list.size()-1);
+            Bitmap pic= BitmapFactory.decodeFile(OkHttpHelper.BITMAP_SAVE_PATH+cards_pic_name_list.get(cards_pic_name_list.size()-1));
             item.put(DBAdapter.COL_PIC_NAME,pic);
 
             item.put(DBAdapter.COL_NAME,dataset.getString(dataset.getColumnIndex(DBAdapter.COL_NAME)));

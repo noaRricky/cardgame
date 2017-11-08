@@ -117,6 +117,8 @@ public class AddHistoryActivity extends AppCompatActivity {
         etPlayerA.setText("");
         etPlayerB.setText("");
         etWinner.setText("");
+        etDate.setText("");
+        etTime.setText("");
     }
 
     private class AddClickListener implements View.OnClickListener {

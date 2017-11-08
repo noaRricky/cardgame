@@ -11,13 +11,13 @@
 
     <ImageView
         android:id="@+id/card_item_iv_pic"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:visibility="visible"
         android:layout_marginStart="10dp"
+        android:layout_weight="1"
         android:contentDescription="@string/cardImage"
-        android:scaleType="centerInside" />
+        android:scaleType="centerInside"
+        android:visibility="visible" />
 
     <TextView
         android:id="@+id/card_item_tv_name"
@@ -25,9 +25,9 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
-        android:textColor="@color/colorBlack"
         android:text="老虎"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@color/colorBlack"
         android:textSize="25sp" />
 
     <LinearLayout

@@ -1,8 +1,11 @@
 package com.zsh.ricky.cardmanager.util;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -13,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,20 +32,28 @@ public class PublicFuntion {
     public static final String Date="Date";
     public static final String Time="Time";
 
+    public void scanFileAsync(Context ctx, String filePath) {
+        File  file=new File(filePath);
+        file.delete();
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(filePath)));
+        ctx.sendBroadcast(scanIntent);
+    }
     //ContentValues 转成 Map<String,String>
     public Map<String,String> ContentValuesToMap(ContentValues cv){
-        Map<String,String> temp=new HashMap<>();
+        Map<String,String> temp=new HashMap<String,String>();
         for (String key:cv.keySet()){
             temp.put(key,cv.get(key).toString());
         }
         return temp;
     }
-    public void copyFile(String oldPath, String newPath) {
+    public void copyFile(Context ctx,String oldPath, String newPath) {
         try {
             int bytesum = 0;
             int byteread = 0;
             File oldfile = new File(oldPath);
-            if (oldfile.exists()) { //文件存在时
+            File newOne=new File(newPath);
+            if (oldfile.exists() && newPath!=oldPath) { //旧文件存在时
                 InputStream inStream = new FileInputStream(oldPath); //读入原文件
                 FileOutputStream fs = new FileOutputStream(newPath);
                 byte[] buffer = new byte[1024];
@@ -58,7 +70,76 @@ public class PublicFuntion {
             System.out.println("复制单个文件操作出错");
             e.printStackTrace();
         }
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(newPath)));
+        ctx.sendBroadcast(scanIntent);
     }
+
+   /* public int copyFile(Context ctx,String fromFile, String toFile)
+    {
+        //要复制的文件目录
+        File[] currentFiles;
+        File root = new File(fromFile);
+        //如同判断SD卡是否存在或者文件是否存在
+        //如果不存在则 return出去
+        if(!root.exists())
+        {
+            return -1;
+        }
+        //如果存在则获取当前目录下的全部文件 填充数组
+        currentFiles = root.listFiles();
+
+        //目标目录
+        File targetDir = new File(toFile);
+        //创建目录
+        if(!targetDir.exists())
+        {
+            targetDir.mkdirs();
+        }
+        //遍历要复制该目录下的全部文件
+        for(int i= 0;i<currentFiles.length;i++)
+        {
+            if(currentFiles[i].isDirectory())//如果当前项为子目录 进行递归
+            {
+                copyFile(ctx,currentFiles[i].getPath() + "/", toFile + currentFiles[i].getName() + "/");
+
+            }else//如果当前项为文件则进行文件拷贝
+            {
+                CopySdcardFile(currentFiles[i].getPath(), toFile + currentFiles[i].getName());
+            }
+        }
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(toFile)));
+        ctx.sendBroadcast(scanIntent);
+        return 0;
+    }
+
+
+    //文件拷贝
+    //要复制的目录下的所有非子目录(文件夹)文件拷贝
+    public int CopySdcardFile(String fromFile, String toFile)
+    {
+
+        try
+        {
+            InputStream fosfrom = new FileInputStream(fromFile);
+            OutputStream fosto = new FileOutputStream(toFile);
+            byte bt[] = new byte[1024];
+            int c;
+            while ((c = fosfrom.read(bt)) > 0)
+            {
+                fosto.write(bt, 0, c);
+            }
+            fosfrom.close();
+            fosto.close();
+            return 0;
+
+        } catch (Exception ex)
+        {
+            return -1;
+        }
+    }
+*/
     public boolean isSave(String path,String fileName){
         try {
             File f=new File(path,fileName);

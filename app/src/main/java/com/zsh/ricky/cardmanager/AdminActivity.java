@@ -42,11 +42,14 @@ public class AdminActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin);
+        try {
+            setContentView(R.layout.activity_admin);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         initView();
         initFragment();
-        int i=0;
-        i+=1;
     }
 
     private void initLists() {

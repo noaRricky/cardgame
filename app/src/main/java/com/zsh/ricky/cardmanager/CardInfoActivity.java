@@ -57,6 +57,7 @@ public class CardInfoActivity extends AppCompatActivity {
     private PublicFuntion pf=new PublicFuntion();
     private Map<String,String> rev_arg=new HashMap<>();
     private boolean isImageChange=false;
+    private Bitmap bitmap_pic;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +96,8 @@ public class CardInfoActivity extends AppCompatActivity {
         cards_attack.setText(rev_arg.get(DBAdapter.COL_ATTACK));
         cards_hp.setText(rev_arg.get(DBAdapter.COL_HP));
         int position=0;
-        if (rev_arg.get(DBAdapter.COL_TYPE)!="肉食动物"){position=1;}
-        cards_type.setSelection(position);
+        //if (rev_arg.get(DBAdapter.COL_TYPE)!="1"){position=1;}
+        cards_type.setSelection(Integer.valueOf(rev_arg.get(DBAdapter.COL_TYPE)));
     }
 
     private void initEvent() {
@@ -137,11 +138,19 @@ public class CardInfoActivity extends AppCompatActivity {
             isImageChange=true;
             ContentResolver cr = this.getContentResolver();
             try {
-                Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                bitmap_pic = BitmapFactory.decodeStream(cr.openInputStream(uri));
 
-                ImageView imageView = (ImageView) findViewById(R.id.ac_image);
+                //ImageView imageView = (ImageView) findViewById(R.id.ac_image);
                 /* 将Bitmap设定到ImageView */
-                imageView.setImageBitmap(bitmap);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                         /* 将Bitmap设定到ImageView */
+                        cards_pic.setImageBitmap(bitmap_pic);
+
+                    }
+                });
+
             } catch (FileNotFoundException e) {
                 Log.e("Exception", e.getMessage(),e);
             }
@@ -152,9 +161,10 @@ public class CardInfoActivity extends AppCompatActivity {
     protected  void initcValues(){
         cValues=new ContentValues();
         //"CardID"由数据库自行给出
+
         cValues.put(DBAdapter.COL_NAME,    cards_name.getText().toString());
         if (isImageChange==true){
-            String[] picName=card_pic_path.split("\\");
+            String[] picName=card_pic_path.split("/");
             cValues.put(DBAdapter.COL_PIC_NAME,picName[picName.length-1]);
         }
         else {
@@ -162,7 +172,7 @@ public class CardInfoActivity extends AppCompatActivity {
         }
         cValues.put(DBAdapter.COL_HP,      cards_hp.getText().toString());
         cValues.put(DBAdapter.COL_ATTACK,  cards_attack.getText().toString());
-        cValues.put(DBAdapter.COL_TYPE,    cards_type.getSelectedItem().toString());
+        cValues.put(DBAdapter.COL_TYPE,cards_type.getSelectedItemPosition());
     }
 
     /**
@@ -172,9 +182,9 @@ public class CardInfoActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            try{
+            try {
                 Map<String, String> card_info = new HashMap<String, String>();
-                card_info.put(DBAdapter.COL_ID,rev_arg.get(DBAdapter.COL_ID));
+                card_info.put(DBAdapter.COL_ID, rev_arg.get(DBAdapter.COL_ID));
 
                 OkHttpHelper httpHelper = new OkHttpHelper();
                 Call call = httpHelper.postRequest(UrlResources.DELETE_CARD, card_info);
@@ -190,14 +200,14 @@ public class CardInfoActivity extends AppCompatActivity {
                         });
                         e.printStackTrace();
                     }
+
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         //删除本地卡牌信息，并跳转到上一级页面
                         SQLiteDatabase db = dbAdapter.getWritableDatabase();
                         //Cursor dataset = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
-                        db.delete(DBAdapter.TABLE_NAME,DBAdapter.COL_ID+"=?",new String[]{rev_arg.get(DBAdapter.COL_ID)});
-                        File pic=new File(OkHttpHelper.BITMAP_SAVE_PATH+rev_arg.get(DBAdapter.COL_PIC_NAME));
-                        pic.delete();
+                        db.delete(DBAdapter.TABLE_NAME, DBAdapter.COL_ID + "=?", new String[]{rev_arg.get(DBAdapter.COL_ID)});
+                        pf.scanFileAsync(CardInfoActivity.this ,OkHttpHelper.BITMAP_SAVE_PATH + rev_arg.get(DBAdapter.COL_PIC_NAME));
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -208,7 +218,7 @@ public class CardInfoActivity extends AppCompatActivity {
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Intent intent =new Intent(CardInfoActivity.this,AdminActivity.class);
+                                        Intent intent = new Intent(CardInfoActivity.this, AdminActivity.class);
                                         startActivity(intent);
                                         finish();
                                     }
@@ -217,12 +227,11 @@ public class CardInfoActivity extends AppCompatActivity {
                         });
                     }
                 });
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-
     /**
      * 更新卡牌信息操作
      */
@@ -231,7 +240,7 @@ public class CardInfoActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             try {
-                if (cards_pic.getDrawable() == null || cards_attack.getText().toString() == null || cards_hp.getText().toString() == null || cards_name.getText().toString() == null || cards_type.getSelectedItem().toString() == null) {
+                if (isEmpty()) {
                     Toast.makeText(getApplicationContext(), "卡牌信息不完整！",
                             Toast.LENGTH_SHORT).show();
                     return;
@@ -240,6 +249,7 @@ public class CardInfoActivity extends AppCompatActivity {
                 initcValues();
                 //卡牌基本信息上传到服务器，成功，则继续上传图片
                 Map<String, String> card_info = pf.ContentValuesToMap(cValues);
+                card_info.put(DBAdapter.COL_ID,rev_arg.get(DBAdapter.COL_ID));
                 OkHttpHelper httpHelper = new OkHttpHelper();
                 Call call = httpHelper.postRequest(UrlResources.UPDATE_CARD_INFO, card_info);
                 call.enqueue(new Callback() {
@@ -275,11 +285,10 @@ public class CardInfoActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
-                                    pf.copyFile(card_pic_path, OkHttpHelper.BITMAP_SAVE_PATH);
-
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
+                                            pf.copyFile(CardInfoActivity.this,card_pic_path, OkHttpHelper.BITMAP_SAVE_PATH);
                                             Toast.makeText(getApplicationContext(), "更新成功！",
                                                     Toast.LENGTH_SHORT).show();
                                         }
@@ -303,6 +312,9 @@ public class CardInfoActivity extends AppCompatActivity {
                         db.update(DBAdapter.TABLE_NAME, cValues,DBAdapter.COL_ID+"=?",args);
                         cValues.clear();
                         dataSet.close();
+                        Intent intent =new Intent(CardInfoActivity.this,AdminActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 });
             } catch (Exception e) {
@@ -310,5 +322,15 @@ public class CardInfoActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    private boolean isEmpty(){
+        if (cards_pic.getDrawable() == null || isEmpty(cards_attack.getText().toString()) || isEmpty(cards_hp.getText().toString()) || isEmpty(cards_name.getText().toString()) || isEmpty(cards_type.getSelectedItem().toString()))
+            return true;
+        return false;
+    }
+    private boolean isEmpty(String str){
+        if (str==null)
+            return true;
+        return str.length()==0;
     }
 }

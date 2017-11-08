@@ -5,13 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <GridView
+    <ListView
         android:id="@+id/cards_info_gv_info"
-
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </GridView>
-
+        android:layout_height="match_parent" />
 </LinearLayout>
 

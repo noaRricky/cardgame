@@ -50,14 +50,12 @@ public class AddCardActivity extends AppCompatActivity {
     private ContentValues cValues;
     private String      card_pic_path;
     private PublicFuntion pf=new PublicFuntion();
+    Bitmap bitmap_pic;
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_card);
-
-        ActivityCompat.requestPermissions(AddCardActivity.this, new String[]{
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
 
         initWeightItems();
         initEvent();
@@ -83,7 +81,7 @@ public class AddCardActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 try {
-                    if(cards_pic_name.getDrawable()==null || cards_attack.getText().toString()==null || cards_hp.getText().toString()==null || cards_name.getText().toString()==null||cards_type.getSelectedItem().toString()==null) {
+                    if (isEmpty()) {
                         Toast.makeText(getApplicationContext(), "卡牌信息不完整！",
                                 Toast.LENGTH_SHORT).show();
                         return;
@@ -114,7 +112,7 @@ public class AddCardActivity extends AppCompatActivity {
                                 public void run() {
                                     try{
                                         OkHttpHelper post_pic=new OkHttpHelper();
-                                        Call pic_call = post_pic.imageUpLoad(UrlResources.NEW_CARD_PIC,card_pic_path);
+                                        Call pic_call = post_pic.imageUpLoad(UrlResources.UPDATE_CARD_PIC,card_pic_path);
                                         pic_call.enqueue(new Callback() {
                                             @Override
                                             public void onFailure(Call call, IOException e) {
@@ -127,8 +125,11 @@ public class AddCardActivity extends AppCompatActivity {
                                                 SQLiteDatabase db= dbAdapter.getWritableDatabase();
                                                 Cursor dataset=db.query(DBAdapter.TABLE_NAME,null,null,null,null,null,null);
                                                 db.insert(DBAdapter.TABLE_NAME,null,cValues);
+                                                pf.copyFile(AddCardActivity.this,card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH+cValues.get(DBAdapter.COL_PIC_NAME));
                                                 cValues.clear();
-                                                pf.copyFile(card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH);
+                                                Intent intent = new Intent(AddCardActivity.this, AdminActivity.class);
+                                                startActivity(intent);
+                                                finish();
                                             }
                                         });
                                     }catch (Exception e){
@@ -171,16 +172,23 @@ public class AddCardActivity extends AppCompatActivity {
             Uri uri = data.getData();
             Log.e("uri", uri.toString());
 
+            PublicFuntion pf=new PublicFuntion();
             card_pic_path=pf.getRealPathFromUri(this,uri);
-
+            //isImageChange=true;
             ContentResolver cr = this.getContentResolver();
             try {
-                Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
+                bitmap_pic = BitmapFactory.decodeStream(cr.openInputStream(uri));
 
-                ImageView imageView = (ImageView) findViewById(R.id.ac_image);
+                //ImageView imageView = (ImageView) findViewById(R.id.ac_image);
                 /* 将Bitmap设定到ImageView */
-                imageView.setImageBitmap(bitmap);
-            } catch (FileNotFoundException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                         /* 将Bitmap设定到ImageView */
+                        cards_pic_name.setImageBitmap(bitmap_pic);
+                    }
+                });
+            } catch (Exception e) {
                 Log.e("Exception", e.getMessage(),e);
             }
         }
@@ -199,11 +207,20 @@ public class AddCardActivity extends AppCompatActivity {
         cValues=new ContentValues();
         //"CardID"由数据库自行给出
         cValues.put(DBAdapter.COL_NAME,    cards_name.getText().toString());
-        String[] picName=card_pic_path.split("\\");
+        String[] picName=card_pic_path.split("/");
         cValues.put(DBAdapter.COL_PIC_NAME,picName[picName.length-1]);
         cValues.put(DBAdapter.COL_HP,      cards_hp.getText().toString());
         cValues.put(DBAdapter.COL_ATTACK,  cards_attack.getText().toString());
-        cValues.put(DBAdapter.COL_TYPE,    cards_type.getSelectedItem().toString());
+        cValues.put(DBAdapter.COL_TYPE,cards_type.getSelectedItemPosition());
     }
-
+    private boolean isEmpty(){
+        if (cards_pic_name.getDrawable() == null || isEmpty(cards_attack.getText().toString()) || isEmpty(cards_hp.getText().toString()) || isEmpty(cards_name.getText().toString()) || isEmpty(cards_type.getSelectedItem().toString()))
+            return true;
+        return false;
+    }
+    private boolean isEmpty(String str){
+        if (str==null)
+            return true;
+        return str.length()==0;
+    }
 }
