@@ -1,6 +1,5 @@
 package com.zsh.ricky.cardmanager.util;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,18 +7,15 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.zsh.ricky.cardmanager.R;
 import com.zsh.ricky.cardmanager.model.Card;
-import com.zsh.ricky.cardmanager.model.Player;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Stack;
-import java.util.concurrent.TimeoutException;
+import java.util.Map;
 
 /**
  * Created by Ricky on 2017/11/9.
@@ -28,23 +24,31 @@ import java.util.concurrent.TimeoutException;
 public class DeckAdapter extends RecyclerView.Adapter<DeckAdapter.ViewHolder> {
 
     private List<Card> cardList;
-    private ArrayList<Integer> selectList;      //存储选择卡牌顺序
+    private Map<Integer, Boolean> map;
 
     private static final String MEAT = "食肉";
     private static final String GRASS = "食草";
 
     public DeckAdapter(List<Card> cardList) {
         this.cardList = cardList;
-        this.selectList = new ArrayList<>();
+        this.map = new HashMap<>();
+        initMap();
     }
 
-    public ArrayList<Integer> getSelectList() {return this.selectList;}
+    public Map<Integer, Boolean> getMap() {return this.map;}
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.deck_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
+        holder.cbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Integer pos = holder.getAdapterPosition();
+                map.put(pos, isChecked);
+            }
+        });
         return holder;
     }
 
@@ -67,23 +71,25 @@ public class DeckAdapter extends RecyclerView.Adapter<DeckAdapter.ViewHolder> {
             holder.tvCardType.setText(GRASS);
         }
 
-        holder.cbSelect.setChecked(false);
-        holder.cbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int pos = holder.getAdapterPosition();
-                if (isChecked) {
-                    selectList.add(pos);
-                } else {
-                    selectList.remove(pos);
-                }
-            }
-        });
+        Integer pos = position;
+        if (map.get(pos) == null) {
+            map.put(pos, false);
+        }
+        holder.cbSelect.setChecked(map.get(pos));
     }
 
     @Override
     public int getItemCount() {
         return cardList.size();
+    }
+
+    /**
+     * 初始化map存储CheckBox的状态
+     */
+    private void initMap() {
+        for (int i = 0; i < cardList.size(); i++) {
+            map.put(i, false);
+        }
     }
 
     //私有构建每个item对应的控件

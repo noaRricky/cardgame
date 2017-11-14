@@ -61,6 +61,7 @@
         android:layout_column="3"
         android:layout_rowWeight="1"
         android:layout_columnWeight="1"
+        android:checked="false"
         android:layout_gravity="center"/>
 
 </GridLayout>

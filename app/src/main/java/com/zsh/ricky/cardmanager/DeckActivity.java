@@ -17,6 +17,7 @@ import com.zsh.ricky.cardmanager.util.ModelUri;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DeckActivity extends AppCompatActivity {
 
@@ -88,19 +89,49 @@ public class DeckActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            ArrayList<Integer> selectedList = deckAdapter.getSelectList();
-            if (selectedList.size() < 20) {
-                Toast.makeText(getApplicationContext(), "至少选择20张卡牌",
+            Map<Integer, Boolean> map = deckAdapter.getMap();
+            if (countSelected(map) < 20) {
+                Toast.makeText(getApplicationContext(), "请至少选择20张卡牌",
                         Toast.LENGTH_SHORT).show();
             } else {
+                ArrayList<Integer> selectedList = getSelectedCards(map);
                 Intent intent = new Intent(DeckActivity.this, GameActivity.class);
-
-                //在intent中添加参数
+                intent.putExtra(ModelUri.USER_ID, userID);
                 intent.putIntegerArrayListExtra(ModelUri.SELECT_LIST, selectedList);
-
                 startActivity(intent);
                 finish();
             }
+        }
+
+        /**
+         * 计算玩家选择的卡牌的数量
+         * @param map 存储卡牌选择的信息
+         * @return 选择卡牌的数目
+         */
+        private int countSelected(Map<Integer, Boolean> map) {
+            int count = 0;
+            for (int i = 0; i < map.size(); i++) {
+                if (map.get(i)) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        /**
+         * 获取选择的卡牌编号
+         * @param map 存储选择的卡牌
+         * @return 选择的卡牌编号信息
+         */
+        private ArrayList<Integer> getSelectedCards(Map<Integer, Boolean> map) {
+            ArrayList<Integer> selectedList = new ArrayList<>();
+            for (int i = 0; i < map.size(); i++) {
+                if (map.get(i)) {
+                    selectedList.add(i);
+                }
+            }
+            return selectedList;
         }
     }
 }
