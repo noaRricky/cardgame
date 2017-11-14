@@ -34,9 +34,6 @@ public class GameActivity extends AppCompatActivity {
     private View preClickedView;
     private Position prePosition;
 
-    private int windowWidth;
-    private int windowHeight;
-
     private AlphaAnimation appearAnimation;
     private AlphaAnimation disappearAnimation;
 
@@ -72,12 +69,8 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        //初始化私有变量
         gameActivity = GameActivity.this;
-        //获取屏幕高度，宽度
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        windowHeight = metrics.heightPixels;
-        windowWidth = metrics.widthPixels;
         preClickedView = null;
         prePosition = null;
 
