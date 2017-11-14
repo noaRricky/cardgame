@@ -103,13 +103,13 @@ public class GameWebSocketListener extends WebSocketListener{
             //设定之前的卡牌消失
             preView.setAlpha(GameActivity.DISAPPEAR_ALPHA);
             //放在战场上的卡牌显示
-            nextView.setImageBitmap(game.cards.get(prePos.getColumn()).getCardPhoto());
+            nextView.setImageBitmap(game.deck.get(prePos.getColumn()).getCardPhoto());
             nextView.setAlpha(GameActivity.APPEAR_ALPHA);
         } else if (prePos.getRow() == GameActivity.MATCH_BATTLE_ROW &&
                 nextPos.getRow() == GameActivity.PLAYER_BATTLE_ROW) {
             //表示对方玩家向对方卡牌发动攻击
-            Card playerCard = game.cards.get(nextPos.getColumn());
-            Card battleCard = game.cards.get(prePos.getColumn());
+            Card playerCard = game.deck.get(nextPos.getColumn());
+            Card battleCard = game.deck.get(prePos.getColumn());
             ImageView playerView = game.playerBattleCardViews.get(nextPos.getColumn());
             ImageView battleView = game.matchBattleCardView.get(prePos.getColumn());
 

@@ -20,4 +20,6 @@ public class ModelUri {
     public static final String USER_NAME = "userName";
     public static final String PASSWORD = "password";
     public static final String userType = "type";
+    public static final String DECK = "deck";
+    public static final String SELECT_LIST = "select_list";
 }

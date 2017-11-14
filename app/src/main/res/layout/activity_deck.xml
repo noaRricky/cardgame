@@ -1,9 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/deck_outer"
+    android:orientation="vertical"
+    android:background="@color/colorWheat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zsh.ricky.cardmanager.DeckActivity">
+    android:weightSum="9">
 
-</android.support.constraint.ConstraintLayout>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/deck_toolBar"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorSaddleBrown">
+
+        <RelativeLayout
+            android:id="@+id/deck_toolBar_inner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:id="@+id/deck_ibBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:background="@color/colorPrimaryDark"
+                android:contentDescription="@string/back"
+                android:scaleType="centerInside"
+                android:src="@drawable/game_img_back" />
+
+            <TextView
+                android:id="@+id/deck_tool_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textSize="20sp"
+                android:textColor="@color/colorWheat"
+                android:text="@string/configure_deck"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/deck_rvCards"
+        android:layout_weight="7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/deck_btStart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorSaddleBrown"
+        android:layout_weight="1"
+        android:textSize="22sp"
+        android:textColor="@color/colorWheat"
+        android:text="@string/start_game"/>
+
+</LinearLayout>

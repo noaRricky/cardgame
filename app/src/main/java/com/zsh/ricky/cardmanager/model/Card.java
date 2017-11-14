@@ -1,6 +1,10 @@
 package com.zsh.ricky.cardmanager.model;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 
 /**
  * Created by Ricky on 2017/11/4.
@@ -80,4 +84,5 @@ public class Card {
     public void setCardPhoto(Bitmap cardPhoto) {
         this.cardPhoto = cardPhoto;
     }
+
 }
