@@ -41,6 +41,7 @@ public class DeckActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Toast.makeText(getApplicationContext(), "请选择10张卡牌", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -77,8 +78,8 @@ public class DeckActivity extends AppCompatActivity {
      */
     private void initCardData() {
         //获取数据
-        CardsFetcher fetcher = new CardsFetcher();
-        cardList = fetcher.getCardList(DeckActivity.this);
+        CardsFetcher fetcher = new CardsFetcher(DeckActivity.this);
+        cardList = fetcher.getCardList();
         deckAdapter = new DeckAdapter(cardList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(DeckActivity.this);
         rvCards.setLayoutManager(layoutManager);
@@ -90,8 +91,11 @@ public class DeckActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Map<Integer, Boolean> map = deckAdapter.getMap();
-            if (countSelected(map) < 20) {
-                Toast.makeText(getApplicationContext(), "请至少选择20张卡牌",
+
+            int count = countSelected(map);
+            if (count != 10) {
+                Toast.makeText(getApplicationContext(),
+                        "当前选择" + String.valueOf(count) + "卡牌",
                         Toast.LENGTH_SHORT).show();
             } else {
                 ArrayList<Integer> selectedList = getSelectedCards(map);
@@ -128,7 +132,8 @@ public class DeckActivity extends AppCompatActivity {
             ArrayList<Integer> selectedList = new ArrayList<>();
             for (int i = 0; i < map.size(); i++) {
                 if (map.get(i)) {
-                    selectedList.add(i);
+                    int cardID = cardList.get(i).getCardID();
+                    selectedList.add(cardID);
                 }
             }
             return selectedList;

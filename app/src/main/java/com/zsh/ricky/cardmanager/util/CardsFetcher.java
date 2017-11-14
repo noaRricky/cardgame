@@ -23,14 +23,53 @@ public class CardsFetcher {
     private Context ct;     //上下文
     private DBAdapter dbAdapter;
     private List<Card> cardList;
+    private List<Card> deck;   //卡牌组
+
+    public CardsFetcher(Context context) {
+        this.ct = context;
+    }
+
+    /**
+     * 根据选择的卡牌编号，获得卡组信息
+     * @param selectedList 选择卡牌编号
+     * @return 卡组信息
+     */
+    public List<Card> getDeck(List<Integer> selectedList) {
+        dbAdapter = new DBAdapter(ct, DBAdapter.DB_NAME, null, 1);
+        SQLiteDatabase db = dbAdapter.getReadableDatabase();
+        deck = new ArrayList<>();
+
+        for(Integer cardID : selectedList) {
+            Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null,
+                    DBAdapter.COL_ID + "=?", new String[]{String.valueOf(cardID)},
+                    null, null, null);
+
+            try {
+                for (dataSet.moveToFirst(); !dataSet.isAfterLast(); dataSet.moveToNext()) {
+                    Card card = newCard(
+                            dataSet.getInt(dataSet.getColumnIndex(DBAdapter.COL_ID)),
+                            dataSet.getString(dataSet.getColumnIndex(DBAdapter.COL_NAME)),
+                            dataSet.getString(dataSet.getColumnIndex(DBAdapter.COL_PIC_NAME)),
+                            dataSet.getInt(dataSet.getColumnIndex(DBAdapter.COL_HP)),
+                            dataSet.getInt(dataSet.getColumnIndex(DBAdapter.COL_ATTACK)),
+                            dataSet.getInt(dataSet.getColumnIndex(DBAdapter.COL_TYPE))
+                    );
+
+                    deck.add(card);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return deck;
+    }
 
     /**
      * 获取所有卡牌信息，包括位图
-     * @param context 上下文
      * @return 卡牌信息列表
      */
-    public List<Card> getCardList(Context context) {
-        this.ct = context;
+    public List<Card> getCardList() {
         dbAdapter = new DBAdapter(ct, DBAdapter.DB_NAME, null, 1);
         SQLiteDatabase db = dbAdapter.getReadableDatabase();
         Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null, null, null,

@@ -1,6 +1,7 @@
 package com.zsh.ricky.cardmanager;
 
 import android.content.Intent;
+import android.graphics.ColorSpace;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -87,16 +88,11 @@ public class GameActivity extends AppCompatActivity {
      * 获取intent中卡牌选择信息构造牌组
      */
     private void createDeck() {
-        CardsFetcher fetcher = new CardsFetcher();
-        List<Card> cardList= fetcher.getCardList(GameActivity.this);
-
         Intent intent = getIntent();
-        ArrayList<Integer> selectList = intent.getIntegerArrayListExtra(ModelUri.SELECT_LIST);
+        List<Integer> selectedList = intent.getIntegerArrayListExtra(ModelUri.SELECT_LIST);
 
-        deck = new ArrayList<>();
-        for (Integer i : selectList) {
-            deck.add(cardList.get(i));
-        }
+        CardsFetcher fetcher = new CardsFetcher(GameActivity.this);
+        deck = fetcher.getDeck(selectedList);
     }
 
     /**
@@ -121,7 +117,7 @@ public class GameActivity extends AppCompatActivity {
 
                 ImageView imgView = new ImageView(gameActivity);
                 if ((i == 0 && j == 0) || (i == 3 && j == 0)) {
-                    imgView.setImageBitmap(deck.get(j).getCardPhoto());
+                    imgView.setImageResource(R.drawable.life_ball);
                     Position position = new Position(i, j, Position.Type.LIFE);
                     position.setCardID(j);
                     imgView.setTag(R.id.img_pos, position);
