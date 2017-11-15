@@ -66,7 +66,7 @@ public class Message {
         try {
             JSONObject jsonObject = new JSONObject(json);
 
-            this.type = (Type) jsonObject.get(MSG_TYPE);
+            this.type = Type.valueOf(jsonObject.getString(MSG_TYPE));
             this.player = jsonObject.getString(PLAYER);
             if (type == Type.PLAY) {
                 this.prePos = new Position(
