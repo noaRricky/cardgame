@@ -1,7 +1,11 @@
 package com.zsh.ricky.cardmanager.model;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ricky on 2017/11/5.
@@ -13,6 +17,7 @@ public class Message {
     private String player;        //用户名字
     private Position prePos;      //第一次选择位置
     private Position nextPos;    //第二次选择位置
+    private List<Integer> deck;    //用于游戏开始的时候传送卡组信息
 
     private static final String MSG_TYPE = "message_type";
     private static final String PLAYER = "player";
@@ -24,12 +29,15 @@ public class Message {
     private static final String NEXT_COLUMN = "next_column";
     private static final String NEXT_IMG_TYPE = "next_img_type";
     private static final String NEXT_CARD_ID = "next_card_id";
+    private static final String DECK = "deck";
+    private static final String EACH_CARD = "each_card";
 
     public Message(Type type, String player) {
         this.type = type;
         this.player = player;
         prePos = null;
         nextPos = null;
+        deck = null;
     }
 
     public Message(Type type,String player, Position prePos, Position nextPos) {
@@ -37,6 +45,16 @@ public class Message {
         this.player = player;
         this.prePos = prePos;
         this.nextPos = nextPos;
+        this.deck = null;
+    }
+
+    public Message(Type type, String player, List<Integer> deck) {
+        this.type = type;
+        this.player = player;
+        this.deck = deck;
+
+        prePos = null;
+        nextPos = null;
     }
 
     /**
@@ -63,6 +81,13 @@ public class Message {
                         jsonObject.getInt(NEXT_CARD_ID),
                         (Position.Type) jsonObject.get(NEXT_IMG_TYPE)
                 );
+            } else if (type == Type.DECK) {
+                JSONArray deckArray = jsonObject.getJSONArray(DECK);
+                deck = new ArrayList<>();
+                for (int i = 0; i < deckArray.length(); i++) {
+                    JSONObject eachObject = deckArray.getJSONObject(i);
+                    deck.add(eachObject.getInt(EACH_CARD));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -89,6 +114,17 @@ public class Message {
                 jsonObject.put(NEXT_COLUMN, nextPos.getColumn());
                 jsonObject.put(NEXT_CARD_ID, nextPos.getCardID());
                 jsonObject.put(NEXT_IMG_TYPE, nextPos.getType());
+            }
+            else if (type == Type.DECK) {
+                JSONArray deckArray = new JSONArray();
+
+                for(Integer each_card : deck) {
+                    JSONObject each_object = new JSONObject();
+                    each_object.put(EACH_CARD, each_card);
+                    deckArray.put(each_object);
+                }
+
+                jsonObject.put(DECK, deckArray);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -129,6 +165,8 @@ public class Message {
     }
 
     public enum Type {
-        START, END, GAME, TURN, WAIT, PLAY
+        START, END, GAME, TURN, WAIT, PLAY, DECK
     }
+
+
 }

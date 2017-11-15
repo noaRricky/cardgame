@@ -132,8 +132,7 @@ public class DeckActivity extends AppCompatActivity {
             ArrayList<Integer> selectedList = new ArrayList<>();
             for (int i = 0; i < map.size(); i++) {
                 if (map.get(i)) {
-                    int cardID = cardList.get(i).getCardID();
-                    selectedList.add(cardID);
+                    selectedList.add(i);
                 }
             }
             return selectedList;

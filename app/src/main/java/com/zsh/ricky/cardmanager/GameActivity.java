@@ -30,6 +30,8 @@ public class GameActivity extends AppCompatActivity {
 
     private GridLayout gameGrid;
 
+    private String userID;     //存储用户ID
+
     //两次点击事件，存储上一次点击的信息
     private View preClickedView;
     private Position prePosition;
@@ -50,9 +52,11 @@ public class GameActivity extends AppCompatActivity {
     public List<ImageView> matchBattleCardView;    //对手战场卡牌img
 
 
-    public List<Card> deck;        //表示卡牌组
-    public int playerCard = 0;     //表示玩家已经抽到的牌的位置
-    public int battleCard = 0;     //表示对战玩家已经抽道德牌的位置
+    public List<Card> allCards;        //表示所有卡牌
+    public List<Integer> playerDeck;    //表示玩家选择的卡组
+    public List<Integer> battleDeck;    //表示对手选择的卡组
+    public int playerCurCard = 0;     //表示玩家已经抽到的牌的位置
+    public int battleCurCard = 0;     //表示对战玩家已经抽道德牌的位置
 
     public static final int PLAYER_HAND_ROW = 3;
     public static final int PLAYER_BATTLE_ROW = 2;
@@ -74,18 +78,20 @@ public class GameActivity extends AppCompatActivity {
         preClickedView = null;
         prePosition = null;
 
-        createDeck();
     }
 
     /**
      * 获取intent中卡牌选择信息构造牌组
      */
-    private void createDeck() {
+    private void createCards() {
         Intent intent = getIntent();
-        List<Integer> selectedList = intent.getIntegerArrayListExtra(ModelUri.SELECT_LIST);
 
+        userID = intent.getStringExtra(ModelUri.USER_ID);
+        playerDeck = intent.getIntegerArrayListExtra(ModelUri.SELECT_LIST);
+
+        //获取所有卡牌信息
         CardsFetcher fetcher = new CardsFetcher(GameActivity.this);
-        deck = fetcher.getDeck(selectedList);
+        allCards = fetcher.getCardList();
     }
 
     /**
@@ -124,20 +130,24 @@ public class GameActivity extends AppCompatActivity {
                     Position position = new Position(i, j, Position.Type.BUTTON);
                     imgView.setTag(R.id.img_pos, position);
                 } else {
-                    imgView.setImageResource(R.drawable.card_back);
                     imgView.setVisibility(View.VISIBLE);
                     Position position = new Position(i, j, Position.Type.CARD);
                     imgView.setTag(R.id.img_pos, position);
-                    if (i == 0) {
+                    if (i == MATCH_HAND_ROW) {
+                        Card card = allCards.get(battleDeck.get(j));
+                        imgView.setImageBitmap(card.getCardPhoto());
                         imgView.setAlpha(APPEAR_ALPHA);
                         matchHandCardViews.add(imgView);
-                    } else if (i == 1) {
+                    } else if (i == MATCH_BATTLE_ROW) {
+                        imgView.setImageResource(R.drawable.card_back);
                         imgView.setAlpha(DISAPPEAR_ALPHA);
                         matchBattleCardView.add(imgView);
-                    } else if (i == 2) {
+                    } else if (i == PLAYER_BATTLE_ROW) {
+                        imgView.setImageResource(R.drawable.card_back);
                         imgView.setAlpha(DISAPPEAR_ALPHA);
                         playerBattleCardViews.add(imgView);
-                    } else {
+                    } else if (i == PLAYER_HAND_ROW){
+                        imgView.setImageResource(playerDeck.get(j));
                         imgView.setAlpha(APPEAR_ALPHA);
                         playerHandCardViews.add(imgView);
                     }
@@ -153,6 +163,10 @@ public class GameActivity extends AppCompatActivity {
                 gameGrid.addView(imgView, layoutParams);
             }
         }
+
+        //因为已经抽取了5张牌，设置当前应该抽取的卡牌
+        playerCurCard = 5;
+        battleCurCard = 5;
 
     }
 
@@ -222,7 +236,8 @@ public class GameActivity extends AppCompatActivity {
                 if (view.getAlpha() == DISAPPEAR_ALPHA) {
                     view.setAlpha(APPEAR_ALPHA);
                     ImageView imageView = (ImageView) view;
-                    imageView.setImageBitmap(deck.get(prePosition.getCardID()).getCardPhoto());
+                    Card card = allCards.get(playerDeck.get(prePosition.getCardID()));
+                    imageView.setImageBitmap(card.getCardPhoto());
                     //设置选择手牌对应的卡牌图片
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
                     preClickedView = null;
@@ -233,8 +248,8 @@ public class GameActivity extends AppCompatActivity {
                     position.getRow() == MATCH_BATTLE_ROW) {
                 if (view.getAlpha() == APPEAR_ALPHA) {
 
-                    Card playerCard = deck.get(prePosition.getCardID());
-                    Card battleCard = deck.get(position.getCardID());
+                    Card playerCard = allCards.get(playerDeck.get(prePosition.getCardID()));
+                    Card battleCard = allCards.get(battleDeck.get(position.getCardID()));
                     if (playerCard.getCardAttack() > battleCard.getCardAttack()) {
                         setDisappearAnimation(view);
                     } else if (playerCard.getCardAttack() < battleCard.getCardAttack()) {
@@ -301,11 +316,12 @@ public class GameActivity extends AppCompatActivity {
      */
     private void drawDeck() {
 
-        if (playerCard < deck.size()) {
+        if (playerCurCard < playerDeck.size()) {
             for (ImageView img : playerHandCardViews) {
                 if (img.getAlpha() == DISAPPEAR_ALPHA) {
-                    img.setImageBitmap(deck.get(playerCard).getCardPhoto());
-                    playerCard++;
+                    Card card = allCards.get(playerDeck.get(playerCurCard));
+                    img.setImageBitmap(card.getCardPhoto());
+                    playerCurCard++;
                     setAppearAnimation(img);
                     return;
                 }
@@ -313,6 +329,9 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 初始化所有游戏内容
+     */
     public void initAllGame() {
         initWidget();
         initAnimation();

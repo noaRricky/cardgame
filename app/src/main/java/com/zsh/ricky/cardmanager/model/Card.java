@@ -10,7 +10,8 @@ import java.io.Serializable;
  * Created by Ricky on 2017/11/4.
  */
 
-public class Card {
+public class Card
+{
 
     private int cardID;
     private String cardName;
