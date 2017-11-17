@@ -1,11 +1,10 @@
 package com.zsh.ricky.cardmanager;
 
 import android.content.Intent;
-import android.graphics.ColorSpace;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -14,15 +13,21 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 
 import com.zsh.ricky.cardmanager.model.Card;
+import com.zsh.ricky.cardmanager.model.Message;
 import com.zsh.ricky.cardmanager.model.Position;
 import com.zsh.ricky.cardmanager.util.CardsFetcher;
 import com.zsh.ricky.cardmanager.util.ModelUri;
+import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -43,28 +48,28 @@ public class GameActivity extends AppCompatActivity {
     private static final int COLUMN = 7;
     private static final String TAG = "game";
 
+    private OkHttpClient client;
     private WebSocket gameSocket;
 
-    //--------------公共变量---------------------------
-    public List<ImageView> playerHandCardViews;     //玩家手牌img
-    public List<ImageView> playerBattleCardViews;   //玩家战场卡牌img
-    public List<ImageView> matchHandCardViews;      //对手手牌img
-    public List<ImageView> matchBattleCardView;    //对手战场卡牌img
+    private List<ImageView> playerHandCardViews;     //玩家手牌img
+    private List<ImageView> playerBattleCardViews;   //玩家战场卡牌img
+    private List<ImageView> matchHandCardViews;      //对手手牌img
+    private List<ImageView> matchBattleCardView;    //对手战场卡牌img
 
 
-    public List<Card> allCards;        //表示所有卡牌
-    public List<Integer> playerDeck;    //表示玩家选择的卡组
-    public List<Integer> battleDeck;    //表示对手选择的卡组
-    public int playerCurCard = 0;     //表示玩家已经抽到的牌的位置
-    public int battleCurCard = 0;     //表示对战玩家已经抽道德牌的位置
+    private List<Card> allCards;        //表示所有卡牌
+    private List<Integer> playerDeck;    //表示玩家选择的卡组
+    private List<Integer> battleDeck;    //表示对手选择的卡组
+    private int playerCurCard = 0;     //表示玩家已经抽到的牌的位置
+    private int battleCurCard = 0;     //表示对战玩家已经抽道德牌的位置
 
-    public static final int PLAYER_HAND_ROW = 3;
-    public static final int PLAYER_BATTLE_ROW = 2;
-    public static final int MATCH_BATTLE_ROW = 1;
-    public static final int MATCH_HAND_ROW = 0;
-    public static final float APPEAR_ALPHA = 1.0f;
-    public static final float DISAPPEAR_ALPHA = 0.0f;
-    public static final float CLICK_ALPHA = 0.5f;
+    private static final int PLAYER_HAND_ROW = 3;
+    private static final int PLAYER_BATTLE_ROW = 2;
+    private static final int MATCH_BATTLE_ROW = 1;
+    private static final int MATCH_HAND_ROW = 0;
+    private static final float APPEAR_ALPHA = 1.0f;
+    private static final float DISAPPEAR_ALPHA = 0.0f;
+    private static final float CLICK_ALPHA = 0.5f;
 
     //------------私有函数区域-----------------------------
 
@@ -78,12 +83,50 @@ public class GameActivity extends AppCompatActivity {
         preClickedView = null;
         prePosition = null;
 
+        createCards();
+        initWebSocket();
     }
+
+
+    /**
+     * 初始化WebSocket相关变量
+     */
+    private void initWebSocket() {
+        client = new OkHttpClient.Builder()
+                .readTimeout(0,  TimeUnit.MILLISECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(OkHttpHelper.GAME_SOCKET)
+                .build();
+
+        gameSocket = client.newWebSocket(request,
+                new GameWebSocketListener());
+
+    }
+
+    /**
+     * 自己构造玩家选择的卡组，用于测试
+     */
+    private void createCards() {
+
+        userID = "4399";
+        playerDeck = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            playerDeck.add(i + 1);
+        }
+
+        //获取所有卡牌信息
+        CardsFetcher fetcher = new CardsFetcher(GameActivity.this);
+        allCards = fetcher.getCardList();
+    }
+
 
     /**
      * 获取intent中卡牌选择信息构造牌组
      */
-    private void createCards() {
+    private void initCards() {
         Intent intent = getIntent();
 
         userID = intent.getStringExtra(ModelUri.USER_ID);
@@ -240,8 +283,13 @@ public class GameActivity extends AppCompatActivity {
                     imageView.setImageBitmap(card.getCardPhoto());
                     //设置选择手牌对应的卡牌图片
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
+
+                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+                    gameSocket.send(message.toJSON());
+
                     preClickedView = null;
                     prePosition = null;
+
                 }
                 //表示玩家想要攻击对方战场上的卡牌
             } else if (prePosition.getRow() == PLAYER_BATTLE_ROW &&
@@ -258,6 +306,9 @@ public class GameActivity extends AppCompatActivity {
                         setDisappearAnimation(preClickedView);
                         setDisappearAnimation(view);
                     }
+
+                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+                    gameSocket.send(message.toJSON());
 
                     preClickedView = null;
                     prePosition = null;
@@ -277,6 +328,13 @@ public class GameActivity extends AppCompatActivity {
     private void handleLifeClick(Position position, View view) {
         if (preClickedView != null) {
             if (prePosition.getRow() == PLAYER_BATTLE_ROW && isMatchBattleEmpty()) {
+
+                Message message = new Message(Message.Type.END, userID);
+                gameSocket.send(message.toJSON());
+
+                //断开WebSocket连接
+                client.dispatcher().executorService().shutdown();
+
                 setDisappearAnimation(view);
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -294,7 +352,10 @@ public class GameActivity extends AppCompatActivity {
      * @param view 点击的视图
      */
     private void handleButtonClick(Position position, View view) {
-        drawDeck();
+        waitForNext();   //玩家本回合结束，限制玩家操作
+
+        Message message = new Message(Message.Type.TURN, userID);
+        gameSocket.send(message.toJSON());
     }
 
     /**
@@ -319,8 +380,11 @@ public class GameActivity extends AppCompatActivity {
         if (playerCurCard < playerDeck.size()) {
             for (ImageView img : playerHandCardViews) {
                 if (img.getAlpha() == DISAPPEAR_ALPHA) {
-                    Card card = allCards.get(playerDeck.get(playerCurCard));
+                    int cardID = playerDeck.get(playerCurCard);
+                    Card card = allCards.get(cardID);
                     img.setImageBitmap(card.getCardPhoto());
+                    Position position = (Position) img.getTag(R.id.img_pos);
+                    position.setCardID(cardID);
                     playerCurCard++;
                     setAppearAnimation(img);
                     return;
@@ -381,6 +445,8 @@ public class GameActivity extends AppCompatActivity {
         ImageView img = playerHandCardViews.get(0);
         setDisappearAnimation(img);
 
+        client.dispatcher().executorService().shutdown();
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -437,6 +503,114 @@ public class GameActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    /**
+     * 处理WebSocket有关的类
+     */
+    private class GameWebSocketListener extends WebSocketListener {
+
+        private String WEB_TAG = "gameWebSocket";
+
+        /**
+         * 初始化时，要提供使用它的活动
+         */
+        public GameWebSocketListener() {}
+
+        @Override
+        public void onOpen(WebSocket webSocket, Response response) {
+            Message message = new Message(Message.Type.START, userID, playerDeck);
+            webSocket.send(message.toJSON());
+        }
+
+        @Override
+        public void onMessage(final WebSocket webSocket, String text) {
+            final Message message = new Message(text);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    switch (message.getType()) {
+                        case FIRST:   //处理玩家先手进攻
+                            battleDeck = message.getDeck();
+                            initAllGame();
+                            startTurn();
+                            break;
+                        case SECOND:   //处理玩家后手进攻
+                            battleDeck = message.getDeck();
+                            initAllGame();
+                            waitForNext();
+                            break;
+                        case TURN:  //玩家开始自己回合处理
+                            startTurn();
+                            break;
+                        case END:  //玩家战败处理
+                            gameLose();
+                            break;
+                        case PLAY: //卡牌选择处理
+                            handlePlayEvent(message.getPrePos(), message.getNextPos());
+                            break;
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onClosed(WebSocket webSocket, int code, String reason) {
+            Log.i(WEB_TAG, "onClosed: game");
+        }
+
+        @Override
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+            webSocket.close(1000, null);
+            Log.i(WEB_TAG, "onClosing: game");
+        }
+
+        @Override
+        public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
+            Log.i(TAG, "onFailure: game");
+        }
+
+        /**
+         * 处理对战玩家对卡牌的操作
+         * @param prePos 前一次选中卡牌的位置
+         * @param nextPos 后一次选中卡牌的位置
+         */
+        private void handlePlayEvent(Position prePos, Position nextPos) {
+
+            //将手牌放到场上的操作
+            if (prePos.getRow() == GameActivity.MATCH_HAND_ROW &&
+                    nextPos.getRow() == GameActivity.MATCH_BATTLE_ROW) {
+
+                ImageView preView = matchHandCardViews.get(prePos.getColumn());
+                ImageView nextView = matchBattleCardView.get(nextPos.getColumn());
+
+                //设定之前的卡牌消失
+                preView.setAlpha(GameActivity.DISAPPEAR_ALPHA);
+                //放在战场上的卡牌显示
+                Card card = allCards.get(battleDeck.get(prePos.getCardID()));
+                nextView.setImageBitmap(card.getCardPhoto());
+                nextView.setAlpha(GameActivity.APPEAR_ALPHA);
+            } else if (prePos.getRow() == GameActivity.MATCH_BATTLE_ROW &&
+                    nextPos.getRow() == GameActivity.PLAYER_BATTLE_ROW) {
+                //表示对方玩家向对方卡牌发动攻击
+                Card playerCard = allCards.get(playerDeck.get(nextPos.getCardID()));
+                Card battleCard = allCards.get(battleDeck.get(prePos.getCardID()));
+                ImageView playerView = playerBattleCardViews.get(nextPos.getColumn());
+                ImageView battleView = matchBattleCardView.get(prePos.getColumn());
+
+                if (playerCard.getCardAttack() > battleCard.getCardAttack()) {
+                    setDisappearAnimation(battleView);
+                } else if (playerCard.getCardAttack() < battleCard.getCardAttack()) {
+                    setDisappearAnimation(playerView);
+                } else if (playerCard.getCardAttack() == battleCard.getCardAttack()) {
+                    setDisappearAnimation(playerView);
+                    setDisappearAnimation(battleView);
+                }
+
+            }  //玩家直接进攻会在Type为end,不需要处理
+
+        }
+
     }
 
 }

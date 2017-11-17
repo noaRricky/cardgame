@@ -81,7 +81,7 @@ public class Message {
                         jsonObject.getInt(NEXT_CARD_ID),
                         (Position.Type) jsonObject.get(NEXT_IMG_TYPE)
                 );
-            } else if (type == Type.DECK) {
+            } else if (type == Type.START || type == Type.FIRST || type == Type.SECOND) {
                 JSONArray deckArray = jsonObject.getJSONArray(DECK);
                 deck = new ArrayList<>();
                 for (int i = 0; i < deckArray.length(); i++) {
@@ -115,7 +115,7 @@ public class Message {
                 jsonObject.put(NEXT_CARD_ID, nextPos.getCardID());
                 jsonObject.put(NEXT_IMG_TYPE, nextPos.getType());
             }
-            else if (type == Type.DECK) {
+            else if (type == Type.START || type == Type.FIRST || type == Type.SECOND) {
                 JSONArray deckArray = new JSONArray();
 
                 for(Integer each_card : deck) {
@@ -164,8 +164,12 @@ public class Message {
         this.nextPos = nextPos;
     }
 
+    public List<Integer> getDeck() {
+        return deck;
+    }
+
     public enum Type {
-        START, END, GAME, TURN, WAIT, PLAY, DECK
+        START, END, FIRST, TURN, SECOND, PLAY
     }
 
 

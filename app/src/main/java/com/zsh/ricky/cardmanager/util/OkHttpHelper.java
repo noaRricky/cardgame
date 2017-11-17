@@ -36,8 +36,9 @@ import okhttp3.ResponseBody;
 public class OkHttpHelper {
     private OkHttpClient client;
     private Call call;
-    private final String BASE_URL = "http://192.168.1.101:8081/CGService/";
-    private final String BASE_IMAGE_URL = "http://192.168.1.101:8080/image/";
+    private final String BASE_URL = "http://192.168.1.119:8081/CGService/";
+    private final String BASE_IMAGE_URL = "http://192.168.1.119:8080/image/";
+    public static final String GAME_SOCKET = "ws://192.168.1.119:8081/CGService/game_socket";
     private static final String BITMAP_SAVE_FOLDER="/cgame/image/";
     public static final String BITMAP_SAVE_PATH = "sdcard"
             + BITMAP_SAVE_FOLDER;
