@@ -53,6 +53,7 @@ public class PublicFuntion {
             int byteread = 0;
             File oldfile = new File(oldPath);
             File newOne=new File(newPath);
+
             if (oldfile.exists() && newPath!=oldPath) { //旧文件存在时
                 InputStream inStream = new FileInputStream(oldPath); //读入原文件
                 FileOutputStream fs = new FileOutputStream(newPath);

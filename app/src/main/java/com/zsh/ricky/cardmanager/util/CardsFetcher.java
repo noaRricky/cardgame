@@ -59,6 +59,11 @@ public class CardsFetcher {
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                if (dataSet != null) {
+                    dataSet.close();
+                }
+                db.close();
             }
         }
 
@@ -91,6 +96,11 @@ public class CardsFetcher {
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            if (dataSet != null) {
+                dataSet.close();
+            }
+            db.close();
         }
 
         return cardList;

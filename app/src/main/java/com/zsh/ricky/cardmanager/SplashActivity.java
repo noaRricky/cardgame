@@ -137,12 +137,16 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
+
+                SQLiteDatabase db = null;
+
                 try {
                     //获取服务器卡牌信息
                     JSONArray cards = new JSONArray(response.body().string());
                     //写入本地卡牌信息
-                    SQLiteDatabase db= dbAdapter.getWritableDatabase();
+                    db= dbAdapter.getWritableDatabase();
                     db.execSQL("DELETE FROM "+DBAdapter.TABLE_NAME);//删除本地卡牌信息
+
                     for (int i=0;i<cards.length();i++){
                         JSONObject row=(JSONObject) cards.get(i);
                         cValues.put(DBAdapter.COL_ID,row.getString(DBAdapter.COL_ID));
@@ -185,6 +189,10 @@ public class SplashActivity extends AppCompatActivity {
 
                 } catch (JSONException e) {
                     e.printStackTrace();
+                } finally {
+                    if (db != null) {
+                        db.close();
+                    }
                 }
             }
         });
@@ -203,7 +211,7 @@ public class SplashActivity extends AppCompatActivity {
     {
         @Override
         public void run() {
-            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            Intent intent = new Intent(SplashActivity.this, GameActivity.class);
 
             startActivity(intent);
             finish();

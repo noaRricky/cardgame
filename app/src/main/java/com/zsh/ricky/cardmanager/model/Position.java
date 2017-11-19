@@ -8,7 +8,7 @@ public class Position {
 
     private int row;
     private int column;
-    private int cardID;   //存储当前位置卡牌在cardList中的位置
+    private int cardPosition;   //存储当前位置卡牌在allCard中的位置
     private Type type;
 
     public static final int CARD_BACK_ID = -1;     //卡牌背面的ID
@@ -21,13 +21,13 @@ public class Position {
         this.row = row;
         this.column = column;
         this.type = type;
-        this.cardID = -1;
+        this.cardPosition = CARD_BACK_ID;
     }
 
     public Position(int row, int column, int cardID, Type type) {
         this.row = row;
         this.column = column;
-        this.cardID = cardID;
+        this.cardPosition = cardID;
         this.type = type;
     }
 
@@ -55,12 +55,12 @@ public class Position {
         this.column = column;
     }
 
-    public int getCardID() {
-        return cardID;
+    public int getCardPosition() {
+        return cardPosition;
     }
 
-    public void setCardID(int cardID) {
-        this.cardID = cardID;
+    public void setCardPosition(int cardPosition) {
+        this.cardPosition = cardPosition;
     }
 
     @Override

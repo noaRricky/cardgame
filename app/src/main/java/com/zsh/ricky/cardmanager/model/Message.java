@@ -107,12 +107,12 @@ public class Message {
             if (type == Type.PLAY) {
                 jsonObject.put(PRE_ROW, prePos.getRow());
                 jsonObject.put(PRE_COLUMN, prePos.getColumn());
-                jsonObject.put(PRE_CARD_ID, prePos.getCardID());
+                jsonObject.put(PRE_CARD_ID, prePos.getCardPosition());
                 jsonObject.put(PRE_IMG_TYPE, prePos.getType());
 
                 jsonObject.put(NEXT_ROW, nextPos.getRow());
                 jsonObject.put(NEXT_COLUMN, nextPos.getColumn());
-                jsonObject.put(NEXT_CARD_ID, nextPos.getCardID());
+                jsonObject.put(NEXT_CARD_ID, nextPos.getCardPosition());
                 jsonObject.put(NEXT_IMG_TYPE, nextPos.getType());
             }
             else if (type == Type.START || type == Type.FIRST || type == Type.SECOND) {
@@ -169,7 +169,7 @@ public class Message {
     }
 
     public enum Type {
-        START, END, FIRST, TURN, SECOND, PLAY
+        START, END, FIRST, TURN, SECOND, PLAY, WAIT
     }
 
 
