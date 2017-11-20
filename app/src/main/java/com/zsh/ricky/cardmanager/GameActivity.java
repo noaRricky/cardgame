@@ -43,6 +43,7 @@ public class GameActivity extends AppCompatActivity {
 
     private AlphaAnimation appearAnimation;
     private AlphaAnimation disappearAnimation;
+    private AlphaAnimation disappearAnimation2;
 
     private static final int ROW = 4;
     private static final int COLUMN = 7;
@@ -86,8 +87,8 @@ public class GameActivity extends AppCompatActivity {
         createCards();
         initAnimation();
         initWidget();
-        waitForNext();
-        initWebSocket();
+        createBattleCard();
+
     }
 
 
@@ -115,7 +116,7 @@ public class GameActivity extends AppCompatActivity {
      */
     private void createCards() {
 
-        userID = "1770";
+        userID = "4399";
         playerDeck = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
@@ -139,7 +140,7 @@ public class GameActivity extends AppCompatActivity {
         matchView.setImageBitmap(card.getCardPhoto());
         matchView.setAlpha(APPEAR_ALPHA);
 
-        cardPos = 4;
+        cardPos = 5;
         matchView = matchBattleCardView.get(3);
         card = allCards.get(cardPos);
         position = (Position) matchView.getTag(R.id.img_pos);
@@ -268,9 +269,11 @@ public class GameActivity extends AppCompatActivity {
         appearAnimation = new AlphaAnimation(DISAPPEAR_ALPHA, APPEAR_ALPHA);
         appearAnimation.setDuration(500);
 
-
         disappearAnimation = new AlphaAnimation(APPEAR_ALPHA, DISAPPEAR_ALPHA);
         disappearAnimation.setDuration(500);
+
+        disappearAnimation2 = new AlphaAnimation(APPEAR_ALPHA, DISAPPEAR_ALPHA);
+        disappearAnimation2.setDuration(500);
     }
 
     private class ImageClickListener implements View.OnClickListener {
@@ -304,7 +307,7 @@ public class GameActivity extends AppCompatActivity {
      * @param position card位置
      * @param view 当前视图
      */
-    private void handleCardClick(Position position,View view) {
+    private void handleCardClick(Position position, final View view) {
 
         //第一次只能选择己方手牌
         if (preClickedView == null ) {
@@ -335,8 +338,8 @@ public class GameActivity extends AppCompatActivity {
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
                     position.setCardPosition(cardPos);
 
-                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
-                    gameSocket.send(message.toJSON());
+//                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+//                    gameSocket.send(message.toJSON());
 
                     preClickedView = null;
                     prePosition = null;
@@ -356,12 +359,11 @@ public class GameActivity extends AppCompatActivity {
                         setDisappearAnimation(preClickedView);
                     } else {
                         setDisappearAnimation(preClickedView);
-                        setDisappearAnimation(view);
-                        preClickedView.setAlpha(DISAPPEAR_ALPHA);
+                        setDisappearAnimation2(view);
                     }
 
-                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
-                    gameSocket.send(message.toJSON());
+//                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+//                    gameSocket.send(message.toJSON());
 
                     preClickedView = null;
                     prePosition = null;
@@ -382,11 +384,11 @@ public class GameActivity extends AppCompatActivity {
         if (preClickedView != null) {
             if (prePosition.getRow() == PLAYER_BATTLE_ROW && isMatchBattleEmpty()) {
 
-                Message message = new Message(Message.Type.END, userID);
-                gameSocket.send(message.toJSON());
+//                Message message = new Message(Message.Type.END, userID);
+//                gameSocket.send(message.toJSON());
 
                 //断开WebSocket连接
-                client.dispatcher().executorService().shutdown();
+//                client.dispatcher().executorService().shutdown();
 
                 setDisappearAnimation(view);
                 new Handler().postDelayed(new Runnable() {
@@ -409,8 +411,8 @@ public class GameActivity extends AppCompatActivity {
 
         drawBattleDeck();   //本机模拟对战玩家抽牌操作，减少传输次数
 
-        Message message = new Message(Message.Type.TURN, userID);
-        gameSocket.send(message.toJSON());
+//        Message message = new Message(Message.Type.TURN, userID);
+//        gameSocket.send(message.toJSON());
     }
 
     /**
@@ -521,7 +523,7 @@ public class GameActivity extends AppCompatActivity {
      * 卡牌出现动画
      * @param view 要出现的卡牌
      */
-    public void setAppearAnimation(final View view) {
+    private void setAppearAnimation(final View view) {
 
         //使卡牌逐渐出现
         view.startAnimation(appearAnimation);
@@ -547,7 +549,8 @@ public class GameActivity extends AppCompatActivity {
      * 卡牌消失动画
      * @param view 要消失的卡牌
      */
-    public void setDisappearAnimation(final View view) {
+    private void setDisappearAnimation(final View view) {
+        view.setAlpha(APPEAR_ALPHA);
         view.startAnimation(disappearAnimation);
         disappearAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -558,6 +561,30 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 view.setAlpha(DISAPPEAR_ALPHA);
+                Log.i(TAG, "onAnimationEnd: set disappear view");
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+    }
+
+    private void setDisappearAnimation2(final View view) {
+        view.setAlpha(APPEAR_ALPHA);
+        view.startAnimation(disappearAnimation2);
+        disappearAnimation2.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setAlpha(DISAPPEAR_ALPHA);
+                Log.i(TAG, "onAnimationEnd: set disappear view");
             }
 
             @Override
@@ -566,6 +593,7 @@ public class GameActivity extends AppCompatActivity {
             }
         });
     }
+
 
     /**
      * 处理WebSocket有关的类
@@ -696,7 +724,7 @@ public class GameActivity extends AppCompatActivity {
                             setDisappearAnimation(playerView);
                         } else if (playerCard.getCardAttack() == battleCard.getCardAttack()) {
                             setDisappearAnimation(playerView);
-                            setDisappearAnimation(battleView);
+                            setDisappearAnimation2(battleView);
                         }
 
                     }  //玩家直接进攻会在Type为end,不需要处理
