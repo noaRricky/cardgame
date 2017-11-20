@@ -24,11 +24,11 @@ public class Message {
     private static final String PRE_ROW = "pre_row";
     private static final String PRE_COLUMN = "pre_column";
     private static final String PRE_IMG_TYPE = "pre_img_type";
-    private static final String PRE_CARD_ID = "pre_card_id";
+    private static final String PRE_CARD_POS = "pre_card_pos";
     private static final String NEXT_ROW = "next_row";
     private static final String NEXT_COLUMN = "next_column";
     private static final String NEXT_IMG_TYPE = "next_img_type";
-    private static final String NEXT_CARD_ID = "next_card_id";
+    private static final String NEXT_CARD_POS = "next_card_pos";
     private static final String DECK = "deck";
     private static final String EACH_CARD = "each_card";
 
@@ -72,14 +72,14 @@ public class Message {
                 this.prePos = new Position(
                         jsonObject.getInt(PRE_ROW),
                         jsonObject.getInt(PRE_COLUMN),
-                        jsonObject.getInt(PRE_CARD_ID),
-                        (Position.Type) jsonObject.get(PRE_IMG_TYPE)
+                        jsonObject.getInt(PRE_CARD_POS),
+                        Position.Type.valueOf(jsonObject.getString(PRE_IMG_TYPE))
                 );
                 this.nextPos = new Position(
                         jsonObject.getInt(NEXT_ROW),
                         jsonObject.getInt(NEXT_COLUMN),
-                        jsonObject.getInt(NEXT_CARD_ID),
-                        (Position.Type) jsonObject.get(NEXT_IMG_TYPE)
+                        jsonObject.getInt(NEXT_CARD_POS),
+                        Position.Type.valueOf(jsonObject.getString(NEXT_IMG_TYPE))
                 );
             } else if (type == Type.START || type == Type.FIRST || type == Type.SECOND) {
                 JSONArray deckArray = jsonObject.getJSONArray(DECK);
@@ -107,12 +107,12 @@ public class Message {
             if (type == Type.PLAY) {
                 jsonObject.put(PRE_ROW, prePos.getRow());
                 jsonObject.put(PRE_COLUMN, prePos.getColumn());
-                jsonObject.put(PRE_CARD_ID, prePos.getCardPosition());
+                jsonObject.put(PRE_CARD_POS, prePos.getCardPosition());
                 jsonObject.put(PRE_IMG_TYPE, prePos.getType());
 
                 jsonObject.put(NEXT_ROW, nextPos.getRow());
                 jsonObject.put(NEXT_COLUMN, nextPos.getColumn());
-                jsonObject.put(NEXT_CARD_ID, nextPos.getCardPosition());
+                jsonObject.put(NEXT_CARD_POS, nextPos.getCardPosition());
                 jsonObject.put(NEXT_IMG_TYPE, nextPos.getType());
             }
             else if (type == Type.START || type == Type.FIRST || type == Type.SECOND) {
