@@ -28,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button bnLogin, bnRegister,bnForget;  //定义登录，注册，忘记密码按钮
     JSONObject forget_json = null;
 
+    private static final int ONLINE = 2;
     private static final int PLAYER = 1;
     private static final int ADMIN = 0;
     private static final int NO_EXIST = -1;
@@ -134,6 +135,15 @@ public class LoginActivity extends AppCompatActivity {
                                 Intent intent = new Intent(LoginActivity.this, AdminActivity.class);
                                 startActivity(intent);
                                 finish();
+                            }
+                            else if (type == ONLINE) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplication(),
+                                                "用户已经登录", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
                             else {
                                 runOnUiThread(new Runnable() {

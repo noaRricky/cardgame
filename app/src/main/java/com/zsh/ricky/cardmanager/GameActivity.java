@@ -84,11 +84,10 @@ public class GameActivity extends AppCompatActivity {
         preClickedView = null;
         prePosition = null;
 
-        createCards();
+        initCards();
         initAnimation();
         initWidget();
-        createBattleCard();
-
+        initWebSocket();
     }
 
 
@@ -338,8 +337,8 @@ public class GameActivity extends AppCompatActivity {
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
                     position.setCardPosition(cardPos);
 
-//                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
-//                    gameSocket.send(message.toJSON());
+                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+                    gameSocket.send(message.toJSON());
 
                     preClickedView = null;
                     prePosition = null;
@@ -362,8 +361,8 @@ public class GameActivity extends AppCompatActivity {
                         setDisappearAnimation2(view);
                     }
 
-//                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
-//                    gameSocket.send(message.toJSON());
+                    Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
+                    gameSocket.send(message.toJSON());
 
                     preClickedView = null;
                     prePosition = null;
@@ -384,11 +383,11 @@ public class GameActivity extends AppCompatActivity {
         if (preClickedView != null) {
             if (prePosition.getRow() == PLAYER_BATTLE_ROW && isMatchBattleEmpty()) {
 
-//                Message message = new Message(Message.Type.END, userID);
-//                gameSocket.send(message.toJSON());
+                Message message = new Message(Message.Type.END, userID);
+                gameSocket.send(message.toJSON());
 
                 //断开WebSocket连接
-//                client.dispatcher().executorService().shutdown();
+                client.dispatcher().executorService().shutdown();
 
                 setDisappearAnimation(view);
                 new Handler().postDelayed(new Runnable() {
@@ -411,8 +410,8 @@ public class GameActivity extends AppCompatActivity {
 
         drawBattleDeck();   //本机模拟对战玩家抽牌操作，减少传输次数
 
-//        Message message = new Message(Message.Type.TURN, userID);
-//        gameSocket.send(message.toJSON());
+        Message message = new Message(Message.Type.TURN, userID);
+        gameSocket.send(message.toJSON());
     }
 
     /**
