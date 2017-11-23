@@ -22,9 +22,13 @@ import android.widget.Toast;
 import android.net.Uri;
 
 import com.zsh.ricky.cardmanager.util.DBAdapter;
+import com.zsh.ricky.cardmanager.util.ModelUri;
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 import com.zsh.ricky.cardmanager.util.UrlResources;
 import com.zsh.ricky.cardmanager.util.PublicFuntion;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -121,15 +125,31 @@ public class AddCardActivity extends AppCompatActivity {
                                             }
                                             @Override
                                             public void onResponse(Call call, Response response) throws IOException {
-                                                //添加到本地数据库中
-                                                SQLiteDatabase db= dbAdapter.getWritableDatabase();
-                                                Cursor dataset=db.query(DBAdapter.TABLE_NAME,null,null,null,null,null,null);
-                                                db.insert(DBAdapter.TABLE_NAME,null,cValues);
-                                                pf.copyFile(AddCardActivity.this,card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH+cValues.get(DBAdapter.COL_PIC_NAME));
-                                                cValues.clear();
-                                                Intent intent = new Intent(AddCardActivity.this, AdminActivity.class);
-                                                startActivity(intent);
-                                                finish();
+
+                                                JSONObject jsonObject = null;
+                                                boolean flag = false;
+                                                try {
+                                                    jsonObject = new JSONObject(
+                                                            response.body().string());
+                                                    flag = jsonObject.getBoolean(ModelUri.RESULT);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+
+                                                if (flag) {
+                                                    //添加到本地数据库中
+                                                    SQLiteDatabase db= dbAdapter.getWritableDatabase();
+                                                    Cursor dataset=db.query(DBAdapter.TABLE_NAME,null,null,null,null,null,null);
+                                                    db.insert(DBAdapter.TABLE_NAME,null,cValues);
+                                                    pf.copyFile(AddCardActivity.this,card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH+cValues.get(DBAdapter.COL_PIC_NAME));
+                                                    cValues.clear();
+                                                    Intent intent = new Intent(AddCardActivity.this, AdminActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                } else {
+                                                    Toast.makeText(getApplicationContext(), "添加数据失败！",
+                                                            Toast.LENGTH_SHORT).show();
+                                                }
                                             }
                                         });
                                     }catch (Exception e){

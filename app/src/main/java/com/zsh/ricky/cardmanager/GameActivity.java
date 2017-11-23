@@ -86,7 +86,7 @@ public class GameActivity extends AppCompatActivity {
         preClickedView = null;
         prePosition = null;
 
-        initCards();
+//        initCards();
         createCards();
         initAnimation();
         initWidget();
@@ -94,6 +94,10 @@ public class GameActivity extends AppCompatActivity {
         initWebSocket();
     }
 
+    @Override
+    public void onBackPressed() {
+        handleSurrenderEvent();
+    }
 
     /**
      * 初始化WebSocket相关变量
@@ -119,19 +123,19 @@ public class GameActivity extends AppCompatActivity {
      */
     private void createCards() {
 
-        userID = "4399";
+        userID = "120";
         playerDeck = new ArrayList<>();
 
         playerDeck.add(0);
         playerDeck.add(1);
         playerDeck.add(2);
+        playerDeck.add(3);
+        playerDeck.add(4);
         playerDeck.add(5);
         playerDeck.add(6);
-        playerDeck.add(9);
         playerDeck.add(10);
+        playerDeck.add(11);
         playerDeck.add(12);
-        playerDeck.add(13);
-        playerDeck.add(15);
 
         //获取所有卡牌信息
         CardsFetcher fetcher = new CardsFetcher(GameActivity.this);
@@ -179,14 +183,14 @@ public class GameActivity extends AppCompatActivity {
     private void initMatchHand() {
         battleCurCard = 0;
 
-       for (int i = 0; i < matchBattleCardView.size(); i++) {
+       for (int i = 0; i < matchHandCardViews.size(); i++) {
            int cardPos = battleDeck.get(battleCurCard);
-           final ImageView img = matchBattleCardView.get(i);
+           final ImageView img = matchHandCardViews.get(i);
            Position position = (Position) img.getTag(R.id.img_pos);
            position.setCardPosition(cardPos);
 
            AlphaAnimation appear = new AlphaAnimation(DISAPPEAR_ALPHA, APPEAR_ALPHA);
-           img.setAnimation(appear);
+           img.startAnimation(appear);
            appear.setAnimationListener(new Animation.AnimationListener() {
                @Override
                public void onAnimationStart(Animation animation) {
@@ -203,6 +207,7 @@ public class GameActivity extends AppCompatActivity {
 
                }
            });
+           //当前卡牌位置加一
            battleCurCard++;
        }
     }
@@ -313,22 +318,25 @@ public class GameActivity extends AppCompatActivity {
 
             Position position = (Position) v.getTag(R.id.img_pos);
 
-            switch (position.getType()) {
-                case BUTTON:
-                    Log.i(TAG, "button");
-                    handleButtonClick(position, v);
-                    break;
-                case CARD_BACK:   //CARD_BAK和CARD处理事务相同
-                case CARD:
-                    Log.i(TAG, "card");
-                    //如果选中卡牌不是对手手牌
-                    handleCardClick(position, v);
-                    break;
-                case DECK:
-                    Log.i(TAG, "deck");
-                case LIFE:
-                    Log.i(TAG, "onClick: life");
-                    handleLifeClick(position, v);
+            if (position.isUseable()) {
+                switch (position.getType()) {
+                    case BUTTON:
+                        Log.i(TAG, "button");
+                        handleButtonClick(position, v);
+                        break;
+                    case CARD_BACK:   //CARD_BAK和CARD处理事务相同
+                    case CARD:
+                        Log.i(TAG, "card");
+                        //如果选中卡牌不是对手手牌
+                        handleCardClick(position, v);
+                        break;
+                    case DECK:
+                        Log.i(TAG, "deck");
+                        handleSurrenderEvent();
+                    case LIFE:
+                        Log.i(TAG, "onClick: life");
+                        handleLifeClick(position, v);
+                }
             }
         }
     }
@@ -371,6 +379,8 @@ public class GameActivity extends AppCompatActivity {
                     position.setCardPosition(cardPos);
                     position.setType(Position.Type.CARD);
 
+                    position.setUseable(false); //设定当前位置不能使用
+
                     Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
                     gameSocket.send(message.toJSON());
 
@@ -400,11 +410,15 @@ public class GameActivity extends AppCompatActivity {
                     if (playerCard.getCardHP() <= 0) {
                         setDisappearAnimation(preClickedView);
                         prePosition.setType(Position.Type.CARD_BACK);
+                        prePosition.setUseable(true);
                     }
                     if (battleCard.getCardHP() <= 0) {
                         setDisappearAnimation2(view);
+                        preClickedView.setAlpha(APPEAR_ALPHA);
                         position.setType(Position.Type.CARD_BACK);
+                        prePosition.setUseable(false);  //当前位置不能使用
                     }
+
 
                     Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
                     gameSocket.send(message.toJSON());
@@ -440,6 +454,8 @@ public class GameActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         setContentView(R.layout.game_win);
+
+                        new Handler().postDelayed(new BackHomeRun(),1000);
                     }
                 }, 1000);
             }
@@ -460,6 +476,28 @@ public class GameActivity extends AppCompatActivity {
         gameSocket.send(message.toJSON());
 
         Toast.makeText(getApplicationContext(), "回合结束", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 处理投降事件
+     */
+    private void handleSurrenderEvent() {
+
+        Toast.makeText(getApplicationContext(), "你投降啦", Toast.LENGTH_SHORT).show();
+
+        Message message = new Message(Message.Type.WIN, userID);
+        gameSocket.send(message.toJSON());
+
+        gameSocket.close(NORMAL_CLOSURE_STATUS, "surrender");
+        client.dispatcher().executorService().shutdown();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setContentView(R.layout.game_lose);
+                new Handler().postDelayed(new BackHomeRun(),1000);
+            }
+        },1000);
     }
 
     /**
@@ -541,9 +579,13 @@ public class GameActivity extends AppCompatActivity {
 
         for (ImageView view : playerHandCardViews) {
             view.setClickable(true);
+            Position position = (Position) view.getTag(R.id.img_pos);
+            position.setUseable(true);
         }
         for (ImageView view : playerBattleCardViews) {
             view.setClickable(true);
+            Position position = (Position) view.getTag(R.id.img_pos);
+            position.setUseable(true);
         }
         for (ImageView view : matchBattleCardView) {
             view.setClickable(true);
@@ -640,6 +682,17 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    //返回主页面
+    private class BackHomeRun implements Runnable {
+
+        @Override
+        public void run() {
+            Intent intent = new Intent(GameActivity.this,
+                    StartActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
 
     /**
      * 处理WebSocket有关的类
@@ -702,6 +755,7 @@ public class GameActivity extends AppCompatActivity {
                     });
                     break;
                 case END:  //玩家战败处理
+
                     webSocket.close(NORMAL_CLOSURE_STATUS, "GAME END");
                     runOnUiThread(new Runnable() {
                         @Override
@@ -713,6 +767,11 @@ public class GameActivity extends AppCompatActivity {
                     break;
                 case PLAY: //卡牌选择处理
                     handlePlayEvent(message.getPrePos(), message.getNextPos());
+                    break;
+                case WIN:
+                    webSocket.close(NORMAL_CLOSURE_STATUS, "GAME END");
+                    handleWinEvent();
+                    client.dispatcher().executorService().shutdown();
                     break;
             }
         }
@@ -795,6 +854,27 @@ public class GameActivity extends AppCompatActivity {
                 }
             });
 
+        }
+
+        /**
+         * 处理获胜事件
+         */
+        private void handleWinEvent() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplication(), "敌方投降", Toast.LENGTH_SHORT).show();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setContentView(R.layout.game_win);
+
+                            new Handler().postDelayed(new BackHomeRun(),1000);
+                        }
+                    }, 1000);
+                }
+            });
         }
 
     }

@@ -171,7 +171,7 @@ public class Message{
     }
 
     public enum Type {
-        START, END, FIRST, TURN, SECOND, PLAY, WAIT
+        START, END, FIRST, TURN, SECOND, PLAY, WAIT, WIN
     }
 
 
