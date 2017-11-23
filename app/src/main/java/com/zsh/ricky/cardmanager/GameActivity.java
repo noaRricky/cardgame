@@ -176,6 +176,37 @@ public class GameActivity extends AppCompatActivity {
         allCards = fetcher.getCardList();
     }
 
+    private void initMatchHand() {
+        battleCurCard = 0;
+
+       for (int i = 0; i < matchBattleCardView.size(); i++) {
+           int cardPos = battleDeck.get(battleCurCard);
+           final ImageView img = matchBattleCardView.get(i);
+           Position position = (Position) img.getTag(R.id.img_pos);
+           position.setCardPosition(cardPos);
+
+           AlphaAnimation appear = new AlphaAnimation(DISAPPEAR_ALPHA, APPEAR_ALPHA);
+           img.setAnimation(appear);
+           appear.setAnimationListener(new Animation.AnimationListener() {
+               @Override
+               public void onAnimationStart(Animation animation) {
+
+               }
+
+               @Override
+               public void onAnimationEnd(Animation animation) {
+                    img.setAlpha(APPEAR_ALPHA);
+               }
+
+               @Override
+               public void onAnimationRepeat(Animation animation) {
+
+               }
+           });
+           battleCurCard++;
+       }
+    }
+
     /**
      * 初始化游戏布局
      */
@@ -218,7 +249,7 @@ public class GameActivity extends AppCompatActivity {
 
                     if (i == MATCH_HAND_ROW) {
                         imgView.setImageResource(R.drawable.card_back);
-                        imgView.setAlpha(APPEAR_ALPHA);
+                        imgView.setAlpha(DISAPPEAR_ALPHA);
                         matchHandCardViews.add(imgView);
                         Position position = new Position(i, j, Position.Type.CARD_BACK);
                         imgView.setTag(R.id.img_pos, position);
@@ -472,8 +503,7 @@ public class GameActivity extends AppCompatActivity {
             for (ImageView img : matchHandCardViews) {
                 if (img.getAlpha() == DISAPPEAR_ALPHA) {
                     int cardPos = battleDeck.get(battleCurCard);
-                    Card card = allCards.get(cardPos);
-                    img.setImageBitmap(card.getCardPhoto());
+                    img.setImageResource(R.drawable.card_back);
                     Position position = (Position) img.getTag(R.id.img_pos);
                     position.setCardPosition(cardPos);
                     battleCurCard++;
@@ -644,6 +674,7 @@ public class GameActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             startTurn();
+                            initMatchHand();
                             Toast.makeText(getApplication(), "" +
                                     "你的回合", Toast.LENGTH_SHORT).show();
                         }
@@ -654,6 +685,7 @@ public class GameActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            initMatchHand();
                             Toast.makeText(getApplication(), "" +
                                     "等待对方回合", Toast.LENGTH_SHORT).show();
                         }
