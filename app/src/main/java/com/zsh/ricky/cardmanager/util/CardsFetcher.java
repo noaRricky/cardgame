@@ -42,7 +42,7 @@ public class CardsFetcher {
         for(Integer cardID : selectedList) {
             Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null,
                     DBAdapter.COL_ID + "=?", new String[]{String.valueOf(cardID)},
-                    null, null, null);
+                    null, null, DBAdapter.COL_ID);
 
             try {
                 for (dataSet.moveToFirst(); !dataSet.isAfterLast(); dataSet.moveToNext()) {
@@ -78,7 +78,7 @@ public class CardsFetcher {
         dbAdapter = new DBAdapter(ct, DBAdapter.DB_NAME, null, 1);
         SQLiteDatabase db = dbAdapter.getReadableDatabase();
         Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null, null, null,
-                null, null, null);
+                null, null, DBAdapter.COL_ID);
         cardList = new ArrayList<>();
 
         try {

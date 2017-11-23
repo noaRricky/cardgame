@@ -11,6 +11,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.zsh.ricky.cardmanager.model.Card;
 import com.zsh.ricky.cardmanager.model.Message;
@@ -71,6 +72,7 @@ public class GameActivity extends AppCompatActivity {
     private static final float APPEAR_ALPHA = 1.0f;
     private static final float DISAPPEAR_ALPHA = 0.0f;
     private static final float CLICK_ALPHA = 0.5f;
+    private static final int NORMAL_CLOSURE_STATUS = 1000;
 
     //------------私有函数区域-----------------------------
 
@@ -85,8 +87,10 @@ public class GameActivity extends AppCompatActivity {
         prePosition = null;
 
         initCards();
+        createCards();
         initAnimation();
         initWidget();
+        waitForNext();
         initWebSocket();
     }
 
@@ -118,9 +122,16 @@ public class GameActivity extends AppCompatActivity {
         userID = "4399";
         playerDeck = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
-            playerDeck.add(i + 1);
-        }
+        playerDeck.add(0);
+        playerDeck.add(1);
+        playerDeck.add(2);
+        playerDeck.add(5);
+        playerDeck.add(6);
+        playerDeck.add(9);
+        playerDeck.add(10);
+        playerDeck.add(12);
+        playerDeck.add(13);
+        playerDeck.add(15);
 
         //获取所有卡牌信息
         CardsFetcher fetcher = new CardsFetcher(GameActivity.this);
@@ -176,6 +187,8 @@ public class GameActivity extends AppCompatActivity {
         playerHandCardViews = new ArrayList<>();
         playerBattleCardViews = new ArrayList<>();
 
+        playerCurCard = 0;      //初始化游戏玩家一开始卡牌位置
+
         for (int i = 0; i < ROW; i++) {
             for (int j = 0; j < COLUMN; j++) {
 //                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sp_001);
@@ -220,7 +233,8 @@ public class GameActivity extends AppCompatActivity {
                         playerBattleCardViews.add(imgView);
                         imgView.setTag(R.id.img_pos, position);
                     } else if (i == PLAYER_HAND_ROW){
-                        int cardPos = playerDeck.get(j);
+                        int cardPos = playerDeck.get(playerCurCard);
+                        playerCurCard++;
                         Card card = allCards.get(cardPos);
                         position.setCardPosition(cardPos);
                         imgView.setImageBitmap(card.getCardPhoto());
@@ -241,17 +255,17 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        //因为已经抽取了5张牌，设置当前应该抽取的卡牌
-        playerCurCard = 5;
-        battleCurCard = 5;
     }
 
     /**
      * 根据获取的对战卡牌组，初始化对手手牌
      */
     private void initMatchHand() {
+        battleCurCard = 0;   //初始化战斗玩家卡牌位置
+
         for (int i = 0; i < matchHandCardViews.size(); i++) {
-            int cardPos = battleDeck.get(i);
+            int cardPos = battleDeck.get(battleCurCard);
+            battleCurCard++;
             ImageView handView = matchHandCardViews.get(i);
             Card card = allCards.get(cardPos);
             Position position = (Position) handView.getTag(R.id.img_pos);
@@ -387,6 +401,7 @@ public class GameActivity extends AppCompatActivity {
                 gameSocket.send(message.toJSON());
 
                 //断开WebSocket连接
+                gameSocket.close(NORMAL_CLOSURE_STATUS, "GAME END");
                 client.dispatcher().executorService().shutdown();
 
                 setDisappearAnimation(view);
@@ -412,6 +427,8 @@ public class GameActivity extends AppCompatActivity {
 
         Message message = new Message(Message.Type.TURN, userID);
         gameSocket.send(message.toJSON());
+
+        Toast.makeText(getApplicationContext(), "回合结束", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -628,6 +645,8 @@ public class GameActivity extends AppCompatActivity {
                         public void run() {
                             initMatchHand();
                             startTurn();
+                            Toast.makeText(getApplication(), "" +
+                                    "你的回合", Toast.LENGTH_SHORT).show();
                         }
                     });
                     break;
@@ -637,6 +656,8 @@ public class GameActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             initMatchHand();
+                            Toast.makeText(getApplication(), "" +
+                                    "等待对方回合", Toast.LENGTH_SHORT).show();
                         }
                     });
                     break;
@@ -645,12 +666,13 @@ public class GameActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             startTurn();
+                            Toast.makeText(getApplication(), "" +
+                                    "你的回合", Toast.LENGTH_SHORT).show();
                         }
                     });
                     break;
                 case END:  //玩家战败处理
-                    Message end = new Message(Message.Type.END, userID);
-                    webSocket.send(end.toJSON());
+                    webSocket.close(NORMAL_CLOSURE_STATUS, "GAME END");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -16,6 +17,8 @@ import com.zsh.ricky.cardmanager.util.DeckAdapter;
 import com.zsh.ricky.cardmanager.util.ModelUri;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +29,10 @@ public class DeckActivity extends AppCompatActivity {
     private Button btStart;
     private ImageButton ibBack;
 
-    DeckAdapter deckAdapter;
+    private DeckAdapter deckAdapter;
     private String userID;
+
+    private static final String TAG = "DeckActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +104,8 @@ public class DeckActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             } else {
                 ArrayList<Integer> selectedList = getSelectedCards(map);
+                Collections.sort(selectedList);
+                Log.i(TAG, "onClick: " + Arrays.toString(selectedList.toArray()));
                 Intent intent = new Intent(DeckActivity.this, GameActivity.class);
                 intent.putExtra(ModelUri.USER_ID, userID);
                 intent.putIntegerArrayListExtra(ModelUri.SELECT_LIST, selectedList);

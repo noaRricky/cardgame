@@ -5,13 +5,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Ricky on 2017/11/5.
  */
 
-public class Message {
+public class Message{
 
     private Type type;
     private String player;        //用户名字
@@ -88,6 +89,7 @@ public class Message {
                     JSONObject eachObject = deckArray.getJSONObject(i);
                     deck.add(eachObject.getInt(EACH_CARD));
                 }
+                Collections.sort(deck);
             }
         } catch (JSONException e) {
             e.printStackTrace();
