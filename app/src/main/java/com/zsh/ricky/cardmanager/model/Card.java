@@ -86,4 +86,7 @@ public class Card
         this.cardPhoto = cardPhoto;
     }
 
+    public void injured(int attack) {
+        this.cardHP -= attack;
+    }
 }

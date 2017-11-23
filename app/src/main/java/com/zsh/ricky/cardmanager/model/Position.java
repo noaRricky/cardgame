@@ -14,7 +14,7 @@ public class Position {
     public static final int CARD_BACK_ID = -1;     //卡牌背面的ID
 
     public enum Type {
-        CARD, LIFE, BUTTON, DECK
+        CARD, LIFE, BUTTON, DECK, CARD_BACK;
     }
 
     public Position(int row, int column, Type type) {

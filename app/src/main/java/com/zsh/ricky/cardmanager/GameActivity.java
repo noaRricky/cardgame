@@ -215,27 +215,30 @@ public class GameActivity extends AppCompatActivity {
                     imgView.setTag(R.id.img_pos, position);
                 } else {
                     imgView.setVisibility(View.VISIBLE);
-                    Position position = new Position(i, j, Position.Type.CARD);
 
                     if (i == MATCH_HAND_ROW) {
                         imgView.setImageResource(R.drawable.card_back);
                         imgView.setAlpha(APPEAR_ALPHA);
                         matchHandCardViews.add(imgView);
+                        Position position = new Position(i, j, Position.Type.CARD_BACK);
                         imgView.setTag(R.id.img_pos, position);
                     } else if (i == MATCH_BATTLE_ROW) {
                         imgView.setImageResource(R.drawable.card_back);
                         imgView.setAlpha(DISAPPEAR_ALPHA);
                         matchBattleCardView.add(imgView);
+                        Position position = new Position(i, j, Position.Type.CARD_BACK);
                         imgView.setTag(R.id.img_pos, position);
                     } else if (i == PLAYER_BATTLE_ROW) {
                         imgView.setImageResource(R.drawable.card_back);
                         imgView.setAlpha(DISAPPEAR_ALPHA);
                         playerBattleCardViews.add(imgView);
+                        Position position = new Position(i, j, Position.Type.CARD_BACK);
                         imgView.setTag(R.id.img_pos, position);
                     } else if (i == PLAYER_HAND_ROW){
                         int cardPos = playerDeck.get(playerCurCard);
                         playerCurCard++;
                         Card card = allCards.get(cardPos);
+                        Position position = new Position(i, j, Position.Type.CARD);
                         position.setCardPosition(cardPos);
                         imgView.setImageBitmap(card.getCardPhoto());
                         imgView.setAlpha(APPEAR_ALPHA);
@@ -257,23 +260,6 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * 根据获取的对战卡牌组，初始化对手手牌
-     */
-    private void initMatchHand() {
-        battleCurCard = 0;   //初始化战斗玩家卡牌位置
-
-        for (int i = 0; i < matchHandCardViews.size(); i++) {
-            int cardPos = battleDeck.get(battleCurCard);
-            battleCurCard++;
-            ImageView handView = matchHandCardViews.get(i);
-            Card card = allCards.get(cardPos);
-            Position position = (Position) handView.getTag(R.id.img_pos);
-            position.setCardPosition(cardPos);
-            handView.setImageBitmap(card.getCardPhoto());
-            handView.setAlpha(APPEAR_ALPHA);
-        }
-    }
 
     /**
      * 初始化动画
@@ -301,6 +287,7 @@ public class GameActivity extends AppCompatActivity {
                     Log.i(TAG, "button");
                     handleButtonClick(position, v);
                     break;
+                case CARD_BACK:   //CARD_BAK和CARD处理事务相同
                 case CARD:
                     Log.i(TAG, "card");
                     //如果选中卡牌不是对手手牌
@@ -348,8 +335,10 @@ public class GameActivity extends AppCompatActivity {
                     Card card = allCards.get(cardPos);
                     imageView.setImageBitmap(card.getCardPhoto());
                     //设置选择手牌对应的卡牌图片
+                    prePosition.setType(Position.Type.CARD_BACK);
                     preClickedView.setAlpha(DISAPPEAR_ALPHA);
                     position.setCardPosition(cardPos);
+                    position.setType(Position.Type.CARD);
 
                     Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
                     gameSocket.send(message.toJSON());
@@ -363,16 +352,27 @@ public class GameActivity extends AppCompatActivity {
                     position.getRow() == MATCH_BATTLE_ROW) {
                 if (view.getAlpha() == APPEAR_ALPHA) {
 
+                    int cardPos = position.getCardPosition();
+                    Position.Type card_type = position.getType();
+                    //如果对战的卡牌为背面，将卡牌翻转
+                    if (card_type == Position.Type.CARD_BACK) {
+                        ImageView img = (ImageView) view;
+                        img.setImageBitmap(allCards.get(cardPos).getCardPhoto());
+                    }
+
                     Card playerCard = allCards.get(prePosition.getCardPosition());
                     Card battleCard = allCards.get(position.getCardPosition());
-                    if (playerCard.getCardAttack() > battleCard.getCardAttack()) {
-                        setDisappearAnimation(view);
-                        preClickedView.setAlpha(APPEAR_ALPHA);
-                    } else if (playerCard.getCardAttack() < battleCard.getCardAttack()) {
+
+                    playerCard.injured(battleCard.getCardAttack());
+                    battleCard.injured(playerCard.getCardAttack());
+
+                    if (playerCard.getCardHP() <= 0) {
                         setDisappearAnimation(preClickedView);
-                    } else {
-                        setDisappearAnimation(preClickedView);
+                        prePosition.setType(Position.Type.CARD_BACK);
+                    }
+                    if (battleCard.getCardHP() <= 0) {
                         setDisappearAnimation2(view);
+                        position.setType(Position.Type.CARD_BACK);
                     }
 
                     Message message = new Message(Message.Type.PLAY, userID, prePosition, position);
@@ -643,7 +643,6 @@ public class GameActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            initMatchHand();
                             startTurn();
                             Toast.makeText(getApplication(), "" +
                                     "你的回合", Toast.LENGTH_SHORT).show();
@@ -655,7 +654,6 @@ public class GameActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            initMatchHand();
                             Toast.makeText(getApplication(), "" +
                                     "等待对方回合", Toast.LENGTH_SHORT).show();
                         }
@@ -720,6 +718,7 @@ public class GameActivity extends AppCompatActivity {
                         //减去1因为手牌位置与实际图片位置差一
                         ImageView preView = matchHandCardViews.get(prePos.getColumn() - 1);
                         ImageView nextView = matchBattleCardView.get(nextPos.getColumn());
+
                         int cardPos = prePos.getCardPosition();
                         Card card = allCards.get(cardPos);
                         Position nextPosInfo = (Position) nextView.getTag(R.id.img_pos);
@@ -729,23 +728,35 @@ public class GameActivity extends AppCompatActivity {
                         preView.setAlpha(DISAPPEAR_ALPHA);
                         //放在战场上的卡牌显示
 
-                        nextView.setImageBitmap(card.getCardPhoto());
+                        nextView.setImageResource(R.drawable.card_back);
                         nextView.setAlpha(APPEAR_ALPHA);
                     } else if (prePos.getRow() == GameActivity.PLAYER_BATTLE_ROW &&
                             nextPos.getRow() == GameActivity.MATCH_BATTLE_ROW) {
+
                         //表示对方玩家向对方卡牌发动攻击
                         Card playerCard = allCards.get(nextPos.getCardPosition());
                         Card battleCard = allCards.get(prePos.getCardPosition());
                         ImageView playerView = playerBattleCardViews.get(nextPos.getColumn());
                         ImageView battleView = matchBattleCardView.get(prePos.getColumn());
+                        Position player_pos = (Position) playerView.getTag(R.id.img_pos);
+                        Position battle_pos = (Position) battleView.getTag(R.id.img_pos);
 
-                        if (playerCard.getCardAttack() > battleCard.getCardAttack()) {
-                            setDisappearAnimation(battleView);
-                        } else if (playerCard.getCardAttack() < battleCard.getCardAttack()) {
+                        if (battle_pos.getType() == Position.Type.CARD_BACK) {
+                            battleView.setImageBitmap(
+                                    allCards.get(battle_pos.getCardPosition()).getCardPhoto());
+                            battle_pos.setType(Position.Type.CARD);
+                        }
+
+
+                        playerCard.injured(battleCard.getCardAttack());
+                        battleCard.injured(playerCard.getCardAttack());
+                        if (playerCard.getCardHP() <= 0) {
                             setDisappearAnimation(playerView);
-                        } else if (playerCard.getCardAttack() == battleCard.getCardAttack()) {
-                            setDisappearAnimation(playerView);
+                            player_pos.setType(Position.Type.CARD_BACK);
+                        }
+                        if (battleCard.getCardHP() <= 0) {
                             setDisappearAnimation2(battleView);
+                            battle_pos.setType(Position.Type.CARD_BACK);
                         }
 
                     }  //玩家直接进攻会在Type为end,不需要处理
