@@ -36,9 +36,9 @@ import okhttp3.ResponseBody;
 public class OkHttpHelper {
     private OkHttpClient client;
     private Call call;
-    private final String BASE_URL = "http://192.168.1.103:8081/CGService/";
-    private final String BASE_IMAGE_URL = "http://192.168.1.103:8080/image/";
-    public static final String GAME_SOCKET = "ws://192.168.1.103:8081/CGService/game_socket";
+    private final String BASE_URL = "http://192.168.43.24:8081/CGService/";
+    private final String BASE_IMAGE_URL = "http://192.168.43.24:8080/image/";
+    public static final String GAME_SOCKET = "ws://192.168.43.24:8081/CGService/game_socket";
     private static final String BITMAP_SAVE_FOLDER="/cgame/image/";
     public static final String BITMAP_SAVE_PATH = "sdcard"
             + BITMAP_SAVE_FOLDER;
@@ -142,7 +142,7 @@ public class OkHttpHelper {
         File file = new File(appDir, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);
-            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
         } catch (FileNotFoundException e) {
@@ -150,18 +150,17 @@ public class OkHttpHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         // 第二步：其次把文件插入到系统图库
-        try {
+        /*try {
             MediaStore.Images.Media.insertImage(context.getContentResolver(), file.getAbsolutePath(), fileName, null);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
 
         // 第三步：最后通知图库更新
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file)));
-        //context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+        //context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file)));
+        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
     }
 
     public Call imageUpLoad(final String url,String localPath) {

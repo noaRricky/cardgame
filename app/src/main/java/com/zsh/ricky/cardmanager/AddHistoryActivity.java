@@ -174,7 +174,7 @@ public class AddHistoryActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getApplicationContext(), "添加数据失败",
+                                        Toast.makeText(getApplicationContext(), "添加数据失败，请检查你要添加的信息是否有误",
                                                 Toast.LENGTH_SHORT).show();
                                     }
                                 });

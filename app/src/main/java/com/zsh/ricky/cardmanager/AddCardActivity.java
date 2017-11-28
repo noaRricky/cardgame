@@ -111,52 +111,58 @@ public class AddCardActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             //图片上传到服务器
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try{
-                                        OkHttpHelper post_pic=new OkHttpHelper();
-                                        Call pic_call = post_pic.imageUpLoad(UrlResources.UPDATE_CARD_PIC,card_pic_path);
-                                        pic_call.enqueue(new Callback() {
-                                            @Override
-                                            public void onFailure(Call call, IOException e) {
-                                                Toast.makeText(getApplicationContext(), "图片上传失败",
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                            @Override
-                                            public void onResponse(Call call, Response response) throws IOException {
+                            JSONObject jsonObject = null;
+                            boolean flag = false;
+                            try {
+                                jsonObject = new JSONObject(
+                                        response.body().string());
+                                flag = jsonObject.getBoolean(ModelUri.RESULT);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 
-                                                JSONObject jsonObject = null;
-                                                boolean flag = false;
-                                                try {
-                                                    jsonObject = new JSONObject(
-                                                            response.body().string());
-                                                    flag = jsonObject.getBoolean(ModelUri.RESULT);
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
+                            if (flag) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            OkHttpHelper post_pic = new OkHttpHelper();
+                                            Call pic_call = post_pic.imageUpLoad(UrlResources.UPDATE_CARD_PIC, card_pic_path);
+                                            pic_call.enqueue(new Callback() {
+                                                @Override
+                                                public void onFailure(Call call, IOException e) {
+                                                    Toast.makeText(getApplicationContext(), "图片上传失败",
+                                                            Toast.LENGTH_SHORT).show();
                                                 }
 
-                                                if (flag) {
+                                                @Override
+                                                public void onResponse(Call call, Response response) throws IOException {
                                                     //添加到本地数据库中
-                                                    SQLiteDatabase db= dbAdapter.getWritableDatabase();
-                                                    Cursor dataset=db.query(DBAdapter.TABLE_NAME,null,null,null,null,null,null);
-                                                    db.insert(DBAdapter.TABLE_NAME,null,cValues);
-                                                    pf.copyFile(AddCardActivity.this,card_pic_path,OkHttpHelper.BITMAP_SAVE_PATH+cValues.get(DBAdapter.COL_PIC_NAME));
+                                                    SQLiteDatabase db = dbAdapter.getWritableDatabase();
+                                                    Cursor dataset = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
+                                                    db.insert(DBAdapter.TABLE_NAME, null, cValues);
+                                                    pf.copyFile(AddCardActivity.this, card_pic_path, OkHttpHelper.BITMAP_SAVE_PATH + cValues.get(DBAdapter.COL_PIC_NAME));
                                                     cValues.clear();
                                                     Intent intent = new Intent(AddCardActivity.this, AdminActivity.class);
                                                     startActivity(intent);
                                                     finish();
-                                                } else {
-                                                    Toast.makeText(getApplicationContext(), "添加数据失败！",
-                                                            Toast.LENGTH_SHORT).show();
+
                                                 }
-                                            }
-                                        });
-                                    }catch (Exception e){
-                                        e.printStackTrace();
+                                            });
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            }).start();
+                                }).start();
+                            }else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "添加数据失败！请检查你要添加的信息是否有误",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
                         }
                     });
                 }

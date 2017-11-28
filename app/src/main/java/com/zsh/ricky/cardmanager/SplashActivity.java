@@ -137,9 +137,7 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
-
                 SQLiteDatabase db = null;
-
                 try {
                     //获取服务器卡牌信息
                     JSONArray cards = new JSONArray(response.body().string());

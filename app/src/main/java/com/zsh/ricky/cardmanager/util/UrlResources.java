@@ -18,6 +18,7 @@ public class UrlResources {
     public static final String DELETE_CARD="delete_card";
     public static final String REGISTER = "register";
     public static final String FORGET = "forget";
+    public static final String LOGIN = "login";
 
     public static final String UPDATE_HISTORY="update_history";
 }

@@ -19,11 +19,18 @@ import com.zsh.ricky.cardmanager.model.Position;
 import com.zsh.ricky.cardmanager.util.CardsFetcher;
 import com.zsh.ricky.cardmanager.util.ModelUri;
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
+import com.zsh.ricky.cardmanager.util.ModelUri;
+import com.zsh.ricky.cardmanager.util.UrlResources;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -58,6 +65,7 @@ public class GameActivity extends AppCompatActivity {
     private List<ImageView> matchHandCardViews;      //对手手牌img
     private List<ImageView> matchBattleCardView;    //对手战场卡牌img
 
+    private boolean picked = false;     //表示是否匹配
 
     private List<Card> allCards;        //表示所有卡牌
     private List<Integer> playerDeck;    //表示玩家选择的卡组
@@ -86,8 +94,8 @@ public class GameActivity extends AppCompatActivity {
         preClickedView = null;
         prePosition = null;
 
-//        initCards();
-        createCards();
+        initCards();
+//        createCards();
         initAnimation();
         initWidget();
         waitForNext();
@@ -96,7 +104,44 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        handleSurrenderEvent();
+        if (picked) {
+            handleSurrenderEvent();
+        } else {
+            Map<String, String> map = new HashMap<>();
+            map.put(ModelUri.ACTION, ModelUri.EXIT);
+            map.put(ModelUri.USER_ID, userID);
+
+            OkHttpHelper helper = new OkHttpHelper();
+            Call call = helper.postRequest(UrlResources.LOGIN, map);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplication(), "无法连接服务器",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplication(), "退出",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+            Intent intent = new Intent(GameActivity.this,
+                    StartActivity.class);
+            intent.putExtra(ModelUri.USER_ID, userID);
+            startActivity(intent);
+            finish();
+        }
     }
 
     /**
@@ -123,7 +168,7 @@ public class GameActivity extends AppCompatActivity {
      */
     private void createCards() {
 
-        userID = "120";
+        userID = "123";
         playerDeck = new ArrayList<>();
 
         playerDeck.add(0);
@@ -393,6 +438,8 @@ public class GameActivity extends AppCompatActivity {
                     position.getRow() == MATCH_BATTLE_ROW) {
                 if (view.getAlpha() == APPEAR_ALPHA) {
 
+                    preClickedView.setAlpha(APPEAR_ALPHA);
+
                     int cardPos = position.getCardPosition();
                     Position.Type card_type = position.getType();
                     //如果对战的卡牌为背面，将卡牌翻转
@@ -529,6 +576,7 @@ public class GameActivity extends AppCompatActivity {
                     position.setCardPosition(cardPos);
                     playerCurCard++;
                     setAppearAnimation(img);
+                    break;
                 }
             }
         }
@@ -546,6 +594,7 @@ public class GameActivity extends AppCompatActivity {
                     position.setCardPosition(cardPos);
                     battleCurCard++;
                     setAppearAnimation(img);
+                    break;
                 }
             }
         }
@@ -603,6 +652,7 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void run() {
                 setContentView(R.layout.game_lose);
+                new Handler().postDelayed(new BackHomeRun(), 1000);
             }
         }, 1000);
     }
@@ -689,6 +739,7 @@ public class GameActivity extends AppCompatActivity {
         public void run() {
             Intent intent = new Intent(GameActivity.this,
                     StartActivity.class);
+            intent.putExtra(ModelUri.USER_ID, userID);
             startActivity(intent);
             finish();
         }
@@ -723,6 +774,7 @@ public class GameActivity extends AppCompatActivity {
                     break;
                 case FIRST:   //处理玩家先手进攻
                     battleDeck = message.getDeck();
+                    picked = true;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -735,6 +787,7 @@ public class GameActivity extends AppCompatActivity {
                     break;
                 case SECOND:   //处理玩家后手进攻
                     battleDeck = message.getDeck();
+                    picked = true;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

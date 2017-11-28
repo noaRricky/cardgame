@@ -16,14 +16,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.zsh.ricky.cardmanager.fragment.CardFragment;
 import com.zsh.ricky.cardmanager.fragment.HistoryFragment;
+import com.zsh.ricky.cardmanager.util.ModelUri;
+import com.zsh.ricky.cardmanager.util.OkHttpHelper;
+import com.zsh.ricky.cardmanager.util.UrlResources;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class AdminActivity extends FragmentActivity {
+
+    private String userID;
 
     private Fragment cardFragment;
     private Fragment historyFragment;
@@ -61,6 +74,9 @@ public class AdminActivity extends FragmentActivity {
     }
 
     private void initView() {
+        Intent intent = getIntent();
+        userID = intent.getStringExtra(ModelUri.USER_ID);
+
         addImgBt = (ImageButton) this.findViewById(R.id.admin_addBt);
         backImgBt = (ImageButton) this.findViewById(R.id.admin_backImageButton);
         adminTab = (TabLayout) this.findViewById(R.id.admin_tabs);
@@ -72,6 +88,36 @@ public class AdminActivity extends FragmentActivity {
         backImgBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Map<String, String> map = new HashMap<>();
+                map.put(ModelUri.ACTION, ModelUri.EXIT);
+                map.put(ModelUri.USER_ID, userID);
+
+                OkHttpHelper helper = new OkHttpHelper();
+                Call call = helper.postRequest(UrlResources.LOGIN, map);
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplication(), "无法连接服务器",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplication(), "退出",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+
                 Intent intent = new Intent(AdminActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();

@@ -3,11 +3,13 @@ package com.zsh.ricky.cardmanager;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.zsh.ricky.cardmanager.util.ModelUri;
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 import com.zsh.ricky.cardmanager.util.UrlResources;
 
@@ -100,6 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                 Map<String, String> map = new HashMap<>();
                 map.put("userID", userID);
                 map.put("password", password);
+                map.put(ModelUri.ACTION, ModelUri.LOGIN);
 
                 OkHttpHelper httpHelper = new OkHttpHelper();
                 Call call = httpHelper.postRequest(url, map);
@@ -133,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             else if (type == ADMIN) {
                                 Intent intent = new Intent(LoginActivity.this, AdminActivity.class);
+                                intent.putExtra(ModelUri.USER_ID, userID);
                                 startActivity(intent);
                                 finish();
                             }

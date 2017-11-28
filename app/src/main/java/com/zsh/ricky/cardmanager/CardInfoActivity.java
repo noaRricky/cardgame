@@ -23,9 +23,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.zsh.ricky.cardmanager.util.DBAdapter;
+import com.zsh.ricky.cardmanager.util.ModelUri;
 import com.zsh.ricky.cardmanager.util.OkHttpHelper;
 import com.zsh.ricky.cardmanager.util.PublicFuntion;
 import com.zsh.ricky.cardmanager.util.UrlResources;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -266,55 +270,75 @@ public class CardInfoActivity extends AppCompatActivity {
                     }
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
-                        //图片上传到服务器
-                        if (isImageChange) {
-                            OkHttpHelper helper = new OkHttpHelper();
-                            Call pic_call = helper.imageUpLoad(UrlResources.UPDATE_CARD_PIC,
-                                    card_pic_path);
-                            pic_call.enqueue(new Callback() {
-                                @Override
-                                public void onFailure(Call call, IOException e) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getApplicationContext(), "上传图片失败",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
+                        //检查卡牌信息是否更新成功
+                        JSONObject jsonObject = null;
+                        boolean flag = false;
+                        try {
+                            jsonObject = new JSONObject(
+                                    response.body().string());
+                            flag = jsonObject.getBoolean(ModelUri.RESULT);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        if(flag) {
+                            //图片上传到服务器
+                            if (isImageChange) {
+                                OkHttpHelper helper = new OkHttpHelper();
+                                Call pic_call = helper.imageUpLoad(UrlResources.UPDATE_CARD_PIC,
+                                        card_pic_path);
+                                pic_call.enqueue(new Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(getApplicationContext(), "上传图片失败",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
 
-                                @Override
-                                public void onResponse(Call call, Response response) throws IOException {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pf.copyFile(CardInfoActivity.this,card_pic_path, OkHttpHelper.BITMAP_SAVE_PATH);
-                                            Toast.makeText(getApplicationContext(), "更新成功！",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
-                            });
-                            //处理不更新图片操作
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                pf.copyFile(CardInfoActivity.this, card_pic_path, OkHttpHelper.BITMAP_SAVE_PATH);
+                                                Toast.makeText(getApplicationContext(), "更新成功！",
+                                                        Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                });
+                                //处理不更新图片操作
+                            } else {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "更新成功",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            //更新到本地数据库中
+                            SQLiteDatabase db = dbAdapter.getWritableDatabase();
+                            Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
+                            String[] args = {rev_arg.get(DBAdapter.COL_ID)};
+                            db.update(DBAdapter.TABLE_NAME, cValues, DBAdapter.COL_ID + "=?", args);
+                            cValues.clear();
+                            dataSet.close();
+                            Intent intent = new Intent(CardInfoActivity.this, AdminActivity.class);
+                            startActivity(intent);
+                            finish();
                         } else {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), "更新成功",
+                                    Toast.makeText(getApplicationContext(), "添加数据失败！请检查你要添加的信息是否有误",
                                             Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
-                        //更新到本地数据库中
-                        SQLiteDatabase db = dbAdapter.getWritableDatabase();
-                        Cursor dataSet = db.query(DBAdapter.TABLE_NAME, null, null, null, null, null, null);
-                        String[] args={rev_arg.get(DBAdapter.COL_ID)};
-                        db.update(DBAdapter.TABLE_NAME, cValues,DBAdapter.COL_ID+"=?",args);
-                        cValues.clear();
-                        dataSet.close();
-                        Intent intent =new Intent(CardInfoActivity.this,AdminActivity.class);
-                        startActivity(intent);
-                        finish();
                     }
                 });
             } catch (Exception e) {

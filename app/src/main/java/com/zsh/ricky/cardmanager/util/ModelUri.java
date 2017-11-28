@@ -22,4 +22,7 @@ public class ModelUri {
     public static final String userType = "type";
     public static final String DECK = "deck";
     public static final String SELECT_LIST = "select_list";
+    public static final String ACTION = "action";
+    public static final String LOGIN = "login";
+    public static final String EXIT = "exit";
 }
